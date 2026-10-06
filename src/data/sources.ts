@@ -1,5 +1,4 @@
-﻿// NASA references used by OrbitFit. URLs point to stable NASA portals / search
-// entry points; confirm the exact record before citing in a publication.
+﻿// NASA references used by OrbitFit. URLs were checked against NASA pages / NTRS records.
 export interface Source {
   id: string
   title: string
@@ -11,26 +10,34 @@ export interface Source {
 export const SOURCES: Source[] = [
   {
     id: 'hrp-muscle-bone',
-    title: 'Human Research Program: evidence on spaceflight muscle and bone loss',
-    organization: 'NASA Human Research Program',
-    url: 'https://humanresearchroadmap.nasa.gov/',
+    title: 'Risk of Impaired Performance Due to Reduced Muscle Size, Strength, and Endurance',
+    organization: 'NASA Human Research Program (Human Health and Performance)',
+    url: 'https://www.nasa.gov/directorates/esdmd/hhp/risk-of-impaired-performance-due-to-reduced-muscle-size-strength-and-endurance/',
     usedFor:
-      'Background for why unloading in microgravity reduces muscle and bone, and why countermeasure exercise is needed. Motivates the gravity-scaled target load and the deconditioning trend rules.',
+      'Why unloading in microgravity reduces muscle size, strength and endurance, and why countermeasure exercise is needed. Motivates the gravity-scaled target load and the deconditioning trend rules.',
+  },
+  {
+    id: 'hrp-bone',
+    title: 'Evidence Report: Risk of Bone Fracture due to Spaceflight-induced Changes to Bone (2017)',
+    organization: 'NASA Human Research Program',
+    url: 'https://ntrs.nasa.gov/citations/20170004597',
+    usedFor:
+      'Bone mineral density declines of roughly 1–1.5% per month at weight-bearing sites on 4–6 month missions. Context only: OrbitFit does NOT estimate bone density.',
   },
   {
     id: 'iss-exercise',
-    title: 'ISS exercise countermeasures: ARED, T2 treadmill, CEVIS (~2 h/day)',
-    organization: 'NASA (International Space Station Program / HRP)',
-    url: 'https://ntrs.nasa.gov/search?q=ARED%20advanced%20resistive%20exercise%20device',
+    title: 'Human Research Program Advanced Exercise Concepts (AEC) Overview (Perusek et al., 2015)',
+    organization: 'NASA Human Research Program, via NASA Technical Reports Server',
+    url: 'https://ntrs.nasa.gov/citations/20160012339',
     usedFor:
-      'Basis for the ARED maximum load (~272 kg / 600 lb), the ~2 h/day exercise budget at 0 g, and the squat / deadlift / heel raise staples. All numbers are simplified in this prototype.',
+      'Describes the ISS exercise hardware used as the model: ARED, T2 treadmill and CEVIS. Basis for the ARED load maximum (~272 kg / 600 lb) and the resistive-exercise staples. The ~2 h/day figure is a simplified approximation, not taken from this report.',
   },
   {
-    id: 'nasa-hrp-portal',
-    title: 'NASA Human Research Program',
-    organization: 'NASA',
-    url: 'https://www.nasa.gov/hrp/',
-    usedFor: 'Program overview for the human health and performance risks that OrbitFit relates to.',
+    id: 'iss-exercise-2024',
+    title: 'Effects of Replacing Treadmill Running with Alternative Exercise Countermeasures During Long-Duration Spaceflight (Varanoske et al., 2024)',
+    organization: 'NASA, via NASA Technical Reports Server',
+    url: 'https://ntrs.nasa.gov/citations/20240000929',
+    usedFor: 'Recent evidence comparing ISS countermeasure devices (ARED, T2, CEVIS) for exploration-class exercise planning.',
   },
 ]
 
