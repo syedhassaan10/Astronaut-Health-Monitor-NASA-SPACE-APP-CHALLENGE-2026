@@ -10,7 +10,7 @@ export interface Source {
 export const SOURCES: Source[] = [
   {
     id: 'hrp-muscle-bone',
-    title: 'Risk of Impaired Performance Due to Reduced Muscle Size, Strength, and Endurance',
+    title: 'Risk of Reduced Physical Performance Capabilities Due to Reduced Muscle Size, Strength, and Endurance (Muscle Risk)',
     organization: 'NASA Human Research Program (Human Health and Performance)',
     url: 'https://www.nasa.gov/directorates/esdmd/hhp/risk-of-impaired-performance-due-to-reduced-muscle-size-strength-and-endurance/',
     usedFor:
@@ -48,7 +48,7 @@ export const SOURCES: Source[] = [
   },
   {
     id: 'hrp-behavioral',
-    title: 'Risk of Adverse Cognitive or Behavioral Conditions and Psychiatric Disorders',
+    title: 'Risk of Adverse Cognitive or Behavioral Changes and Psychiatric Disorders Leading to In-mission Health and Performance and Long-term Health Effects (Behavioral Health Risk)',
     organization: 'NASA Human Research Program (Human Health and Performance)',
     url: 'https://www.nasa.gov/directorates/esdmd/hhp/risk-of-adverse-cognitive-or-behavioral-conditions-and-psychiatric-disorders/',
     usedFor: 'Isolation and confinement as a hazard: why the check-in tracks stress and mood, and why sustained high stress is surfaced for the Crew Medical Officer.',
