@@ -1,6 +1,7 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import Page from '../components/Page'
 import CountermeasureCard from '../components/CountermeasureCard'
+import CameraPanel from '../components/CameraPanel'
 import { useApp } from '../state/AppState'
 import { CREW } from '../data/crew'
 import { EXERCISES, EXERCISE_IDS, type ExerciseId } from '../engine/gravityEngine'
@@ -24,6 +25,7 @@ export default function Crew() {
         </div>
       </div>
       <CountermeasureCard massKg={member.massKg} g={a.g} exercise={exercise} />
+      <CameraPanel exercise={exercise} g={a.g} />
     </Page>
   )
 }
