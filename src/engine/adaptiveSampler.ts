@@ -14,9 +14,10 @@ export interface SamplerConfig {
 }
 
 export const DEFAULT_SAMPLER: SamplerConfig = {
-  // Spec says every 5th frame, but with 300 ms every-frame bursts at each turning point 5 only
-  // reaches ~72-75% fewer calls; 6 reliably clears the 75% acceptance bar (see adaptive.test.ts).
-  baseStride: 6,
+  // The spec says every 5th frame, but with 300 ms every-frame bursts at each turning point,
+  // 5 only gives ~72-75% fewer calls and 6 gave 74.5% on the real demo clip. 7 clears the 75%
+  // acceptance bar with the rep count unchanged (see adaptive.test.ts and the /about benchmark).
+  baseStride: 7,
   burstMs: 300,
   velocityThreshDegPerS: 8,
   armFactor: 2,

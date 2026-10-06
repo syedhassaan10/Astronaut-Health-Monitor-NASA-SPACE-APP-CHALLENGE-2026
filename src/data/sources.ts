@@ -39,6 +39,14 @@ export const SOURCES: Source[] = [
     url: 'https://ntrs.nasa.gov/citations/20240000929',
     usedFor: 'Recent evidence comparing ISS countermeasure devices (ARED, T2, CEVIS) for exploration-class exercise planning.',
   },
+  {
+    id: 'demo-video',
+    title: 'Demo Mode clip: "A Woman Doing Squats" (stock video, downscaled)',
+    organization: 'Julia Larson, via Pexels (Pexels License: free to use)',
+    url: 'https://www.pexels.com/video/a-woman-doing-squats-6454275/',
+    usedFor:
+      'Sample exercise video bundled in public/demo so Demo Mode runs without a webcam. Re-encoded to 480x854 for size; not a NASA source.',
+  },
 ]
 
 export const SOURCE_BY_ID: Record<string, Source> = Object.fromEntries(SOURCES.map((s) => [s.id, s]))

@@ -97,3 +97,44 @@ describe('RepDetector', () => {
   })
 })
 
+
+describe('RepDetector: person-relative top threshold', () => {
+  /** Reps whose standing knee angle only reaches `top` (<160°), like a real, slightly bent stance. */
+  function bentStanceSamples(top: number, bottom: number, reps: number) {
+    const out: { tMs: number; knee: number; asymmetryDeg: number; confidence: number }[] = []
+    let t = 0
+    for (let r = 0; r < reps; r++) {
+      for (let i = 0; i <= 60; i++) {
+        // 2 s down, 2 s up, cosine easing, sampled at 30 fps
+        const x = (i / 60) * 2 * Math.PI
+        out.push({ tMs: t + (i * 1000) / 30, knee: top - ((top - bottom) * (1 - Math.cos(x))) / 2, asymmetryDeg: 3, confidence: 0.95 })
+      }
+      t += 2000 + 500
+      for (let i = 0; i < 15; i++) out.push({ tMs: t + (i * 1000) / 30, knee: top, asymmetryDeg: 3, confidence: 0.95 })
+      t += 500
+    }
+    return out
+  }
+
+  it('counts reps for a person who never extends past 154°', () => {
+    const d = new RepDetector(cfg)
+    let n = 0
+    for (const s of bentStanceSamples(154, 90, 5)) if (d.push(s)?.kind === 'rep') n++
+    expect(n).toBeGreaterThanOrEqual(4) // first rep may be consumed calibrating the reference
+  })
+
+  it('still ignores a squat that does not reach depth, however the top is calibrated', () => {
+    const d = new RepDetector(cfg)
+    let n = 0
+    for (const s of bentStanceSamples(154, 135, 4)) if (d.push(s)?.kind === 'rep') n++
+    expect(n).toBe(0)
+  })
+
+  it('does not lower the top threshold below the configured depth gate + margin', () => {
+    const d = new RepDetector(cfg)
+    // A person who stays in a deep squat (angles 90..125) must not be counted as "standing".
+    let n = 0
+    for (const s of bentStanceSamples(125, 90, 4)) if (d.push(s)?.kind === 'rep') n++
+    expect(n).toBe(0)
+  })
+})

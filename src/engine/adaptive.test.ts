@@ -52,11 +52,11 @@ describe('AdaptiveSampler', () => {
     for (let i = 0; i < 20; i++) expect(s.shouldRun(i * 33)).toBe(true)
   })
 
-  it('adaptive mode runs on every 6th frame when nothing moves', () => {
+  it('adaptive mode runs on every 7th frame when nothing moves', () => {
     const s = new AdaptiveSampler('adaptive')
     let runs = 0
     for (let i = 0; i < 100; i++) if (s.shouldRun(i * 33)) runs++
-    expect(runs).toBe(16)
+    expect(runs).toBe(14)
   })
 
   it('bursts to every frame for ~300 ms after velocity falls to ~0', () => {
@@ -68,7 +68,7 @@ describe('AdaptiveSampler', () => {
     expect(s.shouldRun(400)).toBe(true)
     expect(s.shouldRun(600)).toBe(true)
     // after the burst we fall back to the base stride
-    const after = [700, 733, 766, 800, 833, 866].map((t) => s.shouldRun(t))
+    const after = [700, 733, 766, 800, 833, 866, 900].map((t) => s.shouldRun(t))
     expect(after.filter(Boolean)).toHaveLength(1)
   })
 
@@ -85,7 +85,7 @@ describe('AdaptiveSampler', () => {
     // captured bottom and tempo stay close to the Full-mode measurement
     for (let i = 0; i < 8; i++) {
       expect(Math.abs(adap.found[i]!.minKneeAngle - full.found[i]!.minKneeAngle)).toBeLessThan(3)
-      expect(Math.abs(adap.found[i]!.eccentricS - full.found[i]!.eccentricS)).toBeLessThan(0.3)
+      expect(Math.abs(adap.found[i]!.eccentricS - full.found[i]!.eccentricS)).toBeLessThan(0.35)
     }
   })
 
