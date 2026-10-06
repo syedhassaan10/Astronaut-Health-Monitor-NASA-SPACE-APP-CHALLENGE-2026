@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Page from '../components/Page'
 import CountermeasureCard from '../components/CountermeasureCard'
 import CameraPanel from '../components/CameraPanel'
+import CheckInForm from '../components/CheckInForm'
 import MyStatus from '../components/MyStatus'
 import { useApp } from '../state/AppState'
 import { CREW } from '../data/crew'
@@ -25,6 +26,7 @@ export default function Crew() {
           ))}
         </div>
       </div>
+      <CheckInForm crewId={member.id} crewName={member.name} />
       <MyStatus crewId={member.id} />
       <CountermeasureCard massKg={member.massKg} g={a.g} exercise={exercise} />
       <CameraPanel exercise={exercise} g={a.g} />

@@ -1,8 +1,9 @@
 import { HEALTH_RULES, type HealthRulesConfig } from '../config/healthRules'
 import type { ExerciseId } from './gravityEngine'
 import type {
-  Alert, Baseline, CrewAssessment, ExerciseAssessment, RuleId, SeriesPoint, SessionMetrics, SessionRecord, Status,
+  Alert, Baseline, CheckIn, CrewAssessment, ExerciseAssessment, SeriesPoint, SessionMetrics, SessionRecord, Status,
 } from './healthTypes'
+import { assessCheckins, contextFor } from './checkinRules'
 import { median, summarizeSession } from './sessionMetrics'
 
 type Level = Exclude<Status, 'NOMINAL'>
@@ -41,7 +42,9 @@ interface RuleText {
 }
 
 // Wording rules: "estimate", "trend", "decision support"; never "diagnosis".
-const TEXT: Record<Exclude<RuleId, 'escalation'>, RuleText> = {
+type ExerciseRule = 'depth' | 'concentric' | 'asymmetry' | 'variability' | 'adherence'
+
+const TEXT: Record<ExerciseRule, RuleText> = {
   depth: {
     title: 'Squat depth trend is getting shallower',
     metric: 'Bottom knee angle (median)',
@@ -118,7 +121,7 @@ interface Ctx {
 }
 
 function makeAlert(
-  ctx: Ctx, rule: Exclude<RuleId, 'escalation'>, level: Level,
+  ctx: Ctx, rule: ExerciseRule, level: Level,
   data: { baseline: number | null; now: number; delta: number; summary: string; series: SeriesPoint[] },
 ): Alert {
   const t = TEXT[rule]
@@ -182,9 +185,10 @@ export function assessExercise(
     notes.push(`Building baseline (${Math.min(usable.length, cfg.baselineSessions)}/${cfg.baselineSessions} valid sessions). No trend alerts until it is ready.`)
     const skipped = all.length - usable.length
     if (skipped > 0) notes.push(`${skipped} session(s) ignored: fewer than ${cfg.minValidReps} valid reps or low confidence.`)
-    return finish(ctx, null, usable.length, alerts, notes, cfg)
+    return finish(ctx, null, usable.length, alerts, notes, cfg, null, [])
   }
 
+  const asymSeries = series(usable, (m) => m.asymmetryDeg)
   const after = usable.slice(cfg.baselineSessions)
   const comparable = after.filter((m) => Math.abs(m.gravityG - baseline.gravityG) <= cfg.gravityTolerance)
   if (comparable.length < after.length) {
@@ -192,7 +196,7 @@ export function assessExercise(
   }
   if (comparable.length < cfg.minRecentSessions) {
     notes.push(`Waiting for ${cfg.minRecentSessions} comparable sessions after the baseline (${comparable.length} so far).`)
-    return finish(ctx, baseline, usable.length, alerts, notes, cfg)
+    return finish(ctx, baseline, usable.length, alerts, notes, cfg, null, asymSeries)
   }
 
   const recent = comparable.slice(-cfg.recentSessions)
@@ -245,12 +249,19 @@ export function assessExercise(
     }))
   }
 
-  return finish(ctx, baseline, usable.length, alerts, notes, cfg)
+  const deltas = {
+    depthDeg: depthDelta,
+    concentricPct: conPct,
+    asymmetryDeg: asymDelta,
+    variabilityDeg: varDelta,
+  }
+  return finish(ctx, baseline, usable.length, alerts, notes, cfg, deltas, asymSeries)
 }
 
 /** Derives the status and applies the escalation rule (several WATCH rules together = ACT). */
 function finish(
   ctx: Ctx, baseline: Baseline | null, usableSessions: number, alerts: Alert[], notes: string[], cfg: HealthRulesConfig,
+  deltas: ExerciseAssessment['deltas'], asymmetrySeries: SeriesPoint[],
 ): ExerciseAssessment {
   let status = worstStatus('NOMINAL', ...alerts.map((a) => a.level))
   const watchCount = alerts.filter((a) => a.level === 'WATCH').length
@@ -258,19 +269,31 @@ function finish(
     status = 'ACT'
     notes.push(`${watchCount} rules are at WATCH together, which escalates to ACT.`)
   }
-  return { crewId: ctx.crewId, exercise: ctx.exercise, status, baseline, usableSessions, alerts, notes }
+  return { crewId: ctx.crewId, exercise: ctx.exercise, status, baseline, usableSessions, alerts, deltas, asymmetrySeries, notes }
 }
 
-/** Assess every exercise that a crew member has sessions for. */
+/**
+ * Assess every exercise a crew member has sessions for, then fold in the daily check-ins:
+ * crew-level alerts (pain, recovery, stress, knee pain + asymmetry) and context notes on
+ * the exercise alerts. Status = worst alert level across everything.
+ */
 export function assessCrew(
-  records: SessionRecord[], crewId: string, cfg: HealthRulesConfig = HEALTH_RULES,
+  records: SessionRecord[], crewId: string, cfg: HealthRulesConfig = HEALTH_RULES, checkins: CheckIn[] = [],
 ): CrewAssessment {
   const exercises = [...new Set(records.filter((r) => r.crewId === crewId).map((r) => r.exercise))]
   const per = exercises.map((e) => assessExercise(records, crewId, e, cfg))
+  const checkinAlerts = assessCheckins(checkins, crewId, per, cfg)
+  for (const e of per) {
+    for (const a of e.alerts) {
+      const context = contextFor(a.rule, checkins, crewId, cfg)
+      if (context.length) a.context = context
+    }
+  }
+  const alerts = [...per.flatMap((p) => p.alerts), ...checkinAlerts]
   return {
     crewId,
-    status: worstStatus('NOMINAL', ...per.map((p) => p.status)),
+    status: worstStatus('NOMINAL', ...per.map((p) => p.status), ...checkinAlerts.map((a) => a.level)),
     exercises: per,
-    alerts: per.flatMap((p) => p.alerts),
+    alerts,
   }
 }

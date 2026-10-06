@@ -1,11 +1,15 @@
 import AlertCard from './AlertCard'
 import StatusBadge from './StatusBadge'
 import { DEMO_DAYS } from '../data/demoSeed'
+import CheckinSummary from './CheckinSummary'
 import { useAssessments } from '../state/useAssessments'
+import { useCheckins } from '../state/useCheckins'
 
 /** The astronaut's own trend status (seeded demo data until the logbook lands in Phase 6). */
 export default function MyStatus({ crewId }: { crewId: string }) {
   const a = useAssessments(DEMO_DAYS)[crewId]
+  const mine = useCheckins().filter((c) => c.crewId === crewId)
+  const latest = mine.reduce<(typeof mine)[number] | undefined>((m, c) => (!m || c.day > m.day ? c : m), undefined)
   if (!a) return null
   return (
     <section className="panel" aria-label="My trend status">
@@ -14,6 +18,7 @@ export default function MyStatus({ crewId }: { crewId: string }) {
         <StatusBadge status={a.status} large />
         <span className="label-mono ml-auto">estimate · decision support · mission day {DEMO_DAYS} (seeded demo data)</span>
       </div>
+      <div className="mt-2"><CheckinSummary checkin={latest} /></div>
       {a.alerts.length === 0 ? (
         <p className="text-sm text-ink-300 mt-2">
           No active alerts. Your depth, speed, symmetry, consistency and exercise volume are within your personal baseline.

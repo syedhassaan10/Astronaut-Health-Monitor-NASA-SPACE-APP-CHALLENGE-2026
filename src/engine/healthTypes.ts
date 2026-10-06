@@ -46,7 +46,29 @@ export interface SessionMetrics {
 }
 
 export type Status = 'NOMINAL' | 'WATCH' | 'ACT'
-export type RuleId = 'depth' | 'concentric' | 'asymmetry' | 'variability' | 'adherence' | 'escalation'
+export type RuleId =
+  | 'depth' | 'concentric' | 'asymmetry' | 'variability' | 'adherence' | 'escalation'
+  // Daily check-in rules (Phase 5)
+  | 'pain' | 'recovery' | 'stress' | 'pain-asymmetry'
+
+export type BodyLocation = 'knee' | 'hip' | 'ankle-foot' | 'lower-back' | 'upper-back-neck' | 'shoulder' | 'other'
+
+/** Daily 30-second self-check. All sliders are 0-10. One per crew member per mission day. */
+export interface CheckIn {
+  id: string
+  crewId: string
+  day: number
+  /** 10 = slept very well. */
+  sleep: number
+  /** 10 = exhausted. */
+  fatigue: number
+  /** 0 = no pain, 10 = worst imaginable. */
+  pain: number
+  /** Where it hurts; null when pain is 0. */
+  painLocation: BodyLocation | null
+  /** 10 = very stressed / low mood. */
+  stress: number
+}
 
 export interface Baseline {
   depthDeg: number
@@ -67,7 +89,8 @@ export interface SeriesPoint {
 export interface Alert {
   id: string
   crewId: string
-  exercise: ExerciseId
+  /** Null for crew-level (check-in) alerts that do not belong to one exercise. */
+  exercise: ExerciseId | null
   rule: RuleId
   level: Exclude<Status, 'NOMINAL'>
   title: string
@@ -83,6 +106,8 @@ export interface Alert {
   }
   why: { text: string; sourceId: string }
   actions: string[]
+  /** Optional context from other signals, e.g. "recent check-ins report high fatigue". */
+  context?: string[]
   /** Latest mission day contributing to the alert. */
   day: number
 }
@@ -94,6 +119,9 @@ export interface ExerciseAssessment {
   baseline: Baseline | null
   usableSessions: number
   alerts: Alert[]
+  /** Change vs baseline for each metric (null until a comparable baseline exists). */
+  asymmetrySeries: SeriesPoint[]
+  deltas: { depthDeg: number; concentricPct: number; asymmetryDeg: number; variabilityDeg: number } | null
   /** Plain-language notes, e.g. "Building baseline (2/3)" or why a comparison was paused. */
   notes: string[]
 }

@@ -1,4 +1,4 @@
-import type { RepSample, SessionRecord } from '../engine/healthTypes'
+import type { BodyLocation, CheckIn, RepSample, SessionRecord } from '../engine/healthTypes'
 
 // Deterministic demo data: 3 crew x 30 mission days of squat sessions at 0 g (LEO).
 // Phase 6 stores sessions in IndexedDB and Phase 8 seeds this into it; until then
@@ -90,3 +90,63 @@ export function generateDemoSessions(): SessionRecord[] {
 }
 
 export const DEMO_SESSIONS: SessionRecord[] = generateDemoSessions()
+
+// ---- Daily check-ins (Phase 5) ----------------------------------------------------------
+//   c1 Rivera : sleep falls, fatigue and stress climb late in the mission
+//   c2 Okafor : steady and well
+//   c3 Tanaka : knee pain builds from day 9 (alongside the rising asymmetry)
+
+interface CheckinProfile {
+  crewId: string
+  seed: number
+  sleep: (d: number) => number
+  fatigue: (d: number) => number
+  pain: (d: number) => number
+  painLocation: BodyLocation | null
+  stress: (d: number) => number
+}
+
+const clamp10 = (x: number) => Math.max(0, Math.min(10, Math.round(x)))
+
+const CHECKIN_PROFILES: CheckinProfile[] = [
+  {
+    crewId: 'c1', seed: 11,
+    sleep: (d) => 7.5 - 0.3 * after(d, 18),
+    fatigue: (d) => 3 + 0.45 * after(d, 16),
+    pain: () => 0,
+    painLocation: null,
+    stress: (d) => 3 + 0.25 * after(d, 19),
+  },
+  {
+    crewId: 'c2', seed: 22,
+    sleep: () => 7.5, fatigue: () => 3, pain: () => 0, painLocation: null, stress: () => 3,
+  },
+  {
+    crewId: 'c3', seed: 33,
+    sleep: () => 7, fatigue: () => 3.5,
+    pain: (d) => 0.25 * after(d, 8),
+    painLocation: 'knee',
+    stress: () => 4,
+  },
+]
+
+export function generateDemoCheckins(): CheckIn[] {
+  const out: CheckIn[] = []
+  for (const p of CHECKIN_PROFILES) {
+    const r = rng(p.seed)
+    for (let day = 1; day <= DEMO_DAYS; day++) {
+      const pain = clamp10(p.pain(day) + (p.pain(day) > 0 ? gauss(r) * 0.4 : 0))
+      out.push({
+        id: `${p.crewId}-ci${day}`, crewId: p.crewId, day,
+        sleep: clamp10(p.sleep(day) + gauss(r) * 0.7),
+        fatigue: clamp10(p.fatigue(day) + gauss(r) * 0.7),
+        pain,
+        painLocation: pain > 0 ? p.painLocation : null,
+        stress: clamp10(p.stress(day) + gauss(r) * 0.7),
+      })
+    }
+  }
+  return out
+}
+
+export const DEMO_CHECKINS: CheckIn[] = generateDemoCheckins()

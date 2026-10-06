@@ -13,7 +13,7 @@ export default function AlertCard({ alert, compact = false }: { alert: Alert; co
       <header className="flex flex-wrap items-center gap-2">
         <StatusBadge status={alert.level} />
         <h3 className="font-semibold">{alert.title}</h3>
-        <span className="label-mono ml-auto">{EXERCISES[alert.exercise].label} · day {alert.day}</span>
+        <span className="label-mono ml-auto">{alert.exercise ? EXERCISES[alert.exercise].label : 'Daily check-in'} · day {alert.day}</span>
       </header>
 
       <div className={`mt-3 grid gap-4 ${compact ? '' : 'lg:grid-cols-[1.1fr_1fr]'}`}>
@@ -24,6 +24,14 @@ export default function AlertCard({ alert, compact = false }: { alert: Alert; co
         </section>
 
         <div className="space-y-3">
+          {alert.context && alert.context.length > 0 && (
+            <section aria-label="Context from check-ins" className="rounded-md border border-space-600 bg-space-900 p-2">
+              <h4 className="label-mono">Context from your check-ins</h4>
+              <ul className="list-disc pl-5 mt-1 space-y-1 text-sm text-ink-300">
+                {alert.context.map((c) => <li key={c}>{c}</li>)}
+              </ul>
+            </section>
+          )}
           <section aria-label="Why it matters in spaceflight">
             <h4 className="label-mono">2 · Why it matters in spaceflight</h4>
             <p className="text-sm text-ink-300 mt-1">{alert.why.text}</p>

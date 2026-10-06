@@ -1,0 +1,1 @@
+import{n as e}from"./index-7dv3xdRm.js";var t=e();function n({title:e,subtitle:n,children:r}){return(0,t.jsxs)(`section`,{children:[(0,t.jsx)(`h1`,{className:`text-2xl font-semibold`,children:e}),n&&(0,t.jsx)(`p`,{className:`text-ink-300 mt-1 mb-4`,children:n}),(0,t.jsx)(`div`,{className:`space-y-4 mt-4`,children:r})]})}export{n as t};

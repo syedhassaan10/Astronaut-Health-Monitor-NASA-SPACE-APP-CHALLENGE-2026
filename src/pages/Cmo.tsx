@@ -1,17 +1,23 @@
 import { useState } from 'react'
 import AlertCard from '../components/AlertCard'
 import Page from '../components/Page'
+import CheckinSummary from '../components/CheckinSummary'
+import CheckinTrend from '../components/CheckinTrend'
 import StatusBadge from '../components/StatusBadge'
 import { CREW } from '../data/crew'
 import { DEMO_DAYS } from '../data/demoSeed'
 import type { Alert } from '../engine/healthTypes'
 import { useAssessments } from '../state/useAssessments'
+import { useCheckins } from '../state/useCheckins'
 
 const SEVERITY = { ACT: 0, WATCH: 1 } as const
 
 export default function Cmo() {
   const [day, setDay] = useState(DEMO_DAYS)
   const assessments = useAssessments(day)
+  const checkins = useCheckins().filter((c) => c.day <= day)
+  const latestOf = (crewId: string) =>
+    checkins.filter((c) => c.crewId === crewId).reduce<(typeof checkins)[number] | undefined>((m, c) => (!m || c.day > m.day ? c : m), undefined)
   const alerts: Alert[] = CREW.flatMap((c) => assessments[c.id]?.alerts ?? []).sort(
     (a, b) => SEVERITY[a.level] - SEVERITY[b.level],
   )
@@ -50,9 +56,21 @@ export default function Cmo() {
                 ))}
               </ul>
               {notes.length > 0 && <p className="mt-2 text-xs text-ink-500">{notes[0]}</p>}
+              <div className="mt-3 pt-3 border-t border-space-700"><CheckinSummary checkin={latestOf(c.id)} /></div>
             </section>
           )
         })}
+      </div>
+
+      <h2 className="font-semibold pt-2">Daily check-in trends</h2>
+      <p className="text-sm text-ink-300 -mt-3">Self-reported sleep, fatigue, pain and stress (0-10) shown next to the exercise trends above.</p>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {CREW.map((c) => (
+          <section key={c.id} className="panel" aria-label={`${c.name} check-in trend`}>
+            <p className="text-sm font-semibold mb-2">{c.name}</p>
+            <CheckinTrend checkins={checkins.filter((x) => x.crewId === c.id)} label={c.name} />
+          </section>
+        ))}
       </div>
 
       <h2 className="font-semibold pt-2">Alerts ({alerts.length})</h2>

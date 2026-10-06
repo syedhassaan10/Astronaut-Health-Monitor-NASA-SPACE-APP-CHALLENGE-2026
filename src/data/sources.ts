@@ -40,6 +40,20 @@ export const SOURCES: Source[] = [
     usedFor: 'Recent evidence comparing ISS countermeasure devices (ARED, T2, CEVIS) for exploration-class exercise planning.',
   },
   {
+    id: 'hrp-sleep',
+    title: 'Risk of Performance Decrements and Adverse Health Outcomes Resulting from Sleep Loss, Circadian Desynchronization, and Work Overload',
+    organization: 'NASA Human Research Program (Human Health and Performance)',
+    url: 'https://www.nasa.gov/directorates/esdmd/hhp/risk-of-performance-decrements-and-adverse-health-outcomes-resulting-from-sleep-loss-circadian-desynchronization-and-work-overload/',
+    usedFor: 'Why poor sleep and high fatigue matter on missions, and why the daily check-in flags them and treats them as context for slower or less consistent reps.',
+  },
+  {
+    id: 'hrp-behavioral',
+    title: 'Risk of Adverse Cognitive or Behavioral Conditions and Psychiatric Disorders',
+    organization: 'NASA Human Research Program (Human Health and Performance)',
+    url: 'https://www.nasa.gov/directorates/esdmd/hhp/risk-of-adverse-cognitive-or-behavioral-conditions-and-psychiatric-disorders/',
+    usedFor: 'Isolation and confinement as a hazard: why the check-in tracks stress and mood, and why sustained high stress is surfaced for the Crew Medical Officer.',
+  },
+  {
     id: 'demo-video',
     title: 'Demo Mode clip: "A Woman Doing Squats" (stock video, downscaled)',
     organization: 'Julia Larson, via Pexels (Pexels License: free to use)',

@@ -35,6 +35,26 @@ export interface HealthRulesConfig {
 
   /** This many concurrent WATCH-level rules escalate the exercise to ACT. */
   escalateWatchCount: number
+
+  /** Daily check-in rules (self-reported, 0-10 sliders). */
+  checkin: {
+    /** Rules look at the latest N check-ins. */
+    window: number
+    /** Pain (0-10): sustained = at least minSustained of the window at/above the level. */
+    pain: LevelThresholds
+    minSustained: number
+    /** A single report at/above this raises WATCH immediately (acute report). */
+    acutePain: number
+    /** Knee pain at/above this, in any of the latest check-ins, counts for the combined rule. */
+    kneePainMin: number
+    /** Combined rule: asymmetry must have risen at least this many degrees above baseline. */
+    combinedAsymmetryDeg: number
+    /** Recovery: sleep at/below AND fatigue at/above these, sustained. */
+    sleepLow: number
+    fatigueHigh: number
+    /** Stress at/above this, sustained. */
+    stressHigh: number
+  }
 }
 
 export const HEALTH_RULES: HealthRulesConfig = {
@@ -52,4 +72,16 @@ export const HEALTH_RULES: HealthRulesConfig = {
   adherence: { watch: 0.8, act: 0.6, windowDays: 7 },
 
   escalateWatchCount: 3,
+
+  checkin: {
+    window: 3,
+    pain: { watch: 4, act: 7 },
+    minSustained: 2,
+    acutePain: 7,
+    kneePainMin: 3,
+    combinedAsymmetryDeg: 2,
+    sleepLow: 4,
+    fatigueHigh: 7,
+    stressHigh: 8,
+  },
 }
