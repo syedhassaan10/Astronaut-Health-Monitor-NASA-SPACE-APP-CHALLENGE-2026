@@ -1,0 +1,42 @@
+﻿@import "tailwindcss";
+
+@theme {
+  --color-space-950: #060b16;
+  --color-space-900: #0b1220;
+  --color-space-800: #111b2e;
+  --color-space-700: #1a2740;
+  --color-space-600: #26375a;
+  --color-ink-100: #e6edf7;
+  --color-ink-300: #aab8d0;
+  --color-ink-500: #7a8aa8;
+  --color-accent: #38bdf8;
+  --color-nominal: #34d399;
+  --color-watch: #fbbf24;
+  --color-act: #f87171;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+
+html, body, #root { min-height: 100%; }
+body {
+  background: var(--color-space-950);
+  color: var(--color-ink-100);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Visible keyboard focus everywhere (accessibility). */
+:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+.panel {
+  background: var(--color-space-800);
+  border: 1px solid var(--color-space-700);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+.label-mono {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-ink-500);
+}
