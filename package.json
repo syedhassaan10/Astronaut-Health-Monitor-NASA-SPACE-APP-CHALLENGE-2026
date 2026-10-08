@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "description": "OrbitFit: exercise-based astronaut health self-monitoring. Offline-first static web app (NASA Space Apps Challenge 2026).",
-  "author": "Syed Hassaan Areeb Kazmi, Eman Fatima, Mohammad Bin Javed, Azam Tariq, Hudebia",
+  "author": "Syed Hassaan Areeb Kazmi, Azam Tariq, Eman Fatima, Mohammad Bin Javed, Hudebia",
   "license": "MIT",
   "type": "module",
   "engines": {

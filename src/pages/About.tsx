@@ -10,11 +10,11 @@ const NAV = [
   ['benchmark', 'Benchmark'], ['limitations', 'Limitations'], ['claims', 'Claims we avoid'], ['future', 'Future work'], ['team', 'Team'],
 ] as const
 
-export const TEAM: readonly { name: string; country: string }[] = [
-  { name: 'Syed Hassaan Areeb Kazmi', country: 'Pakistan' },
-  { name: 'Eman Fatima', country: 'Pakistan' },
+export const TEAM: readonly { name: string; role?: string; country: string }[] = [
+  { name: 'Syed Hassaan Areeb Kazmi', role: 'Team Owner', country: 'Pakistan' },
+  { name: 'Azam Tariq', role: 'Developer', country: 'Pakistan' },
+  { name: 'Eman Fatima', role: 'UI/UX Designer', country: 'Pakistan' },
   { name: 'Mohammad Bin Javed', country: 'Pakistan' },
-  { name: 'Azam Tariq', country: 'Pakistan' },
   { name: 'Hudebia', country: 'Pakistan' },
 ]
 
@@ -246,6 +246,7 @@ export default function About() {
           {TEAM.map((m) => (
             <li key={m.name} className="bg-space-900 border border-space-700 rounded-lg px-3 py-2">
               <span className="text-ink-100 font-semibold">{m.name}</span>
+              {m.role && <span className="block text-xs text-accent">{m.role}</span>}
               <span className="block text-xs text-ink-500">{m.country}</span>
             </li>
           ))}

@@ -6,7 +6,7 @@ Decision support, not a diagnosis. Built as a static web app: no backend, no acc
 - **Live demo:** `[PLACEHOLDER: https://your-orbitfit-url.example.com]`
 - **30-second video:** `[PLACEHOLDER: https://your-video-link.example.com]`
 - **Challenge:** NASA Space Apps Challenge 2026, *"Create Health Monitoring Software for Astronauts on Space Missions"*
-- **Team:** Syed Hassaan Areeb Kazmi, Eman Fatima, Mohammad Bin Javed, Azam Tariq, Hudebia (Pakistan)
+- **Team:** Syed Hassaan Areeb Kazmi (Team Owner), Azam Tariq (Developer), Eman Fatima (UI/UX Designer), Mohammad Bin Javed, Hudebia (Pakistan)
 
 > Prototype decision-support tool. Not a medical device. Thresholds are demonstration values, not clinically validated.
 
@@ -155,11 +155,13 @@ for the full list of limitations and future work (ARED hardware integration, cli
 
 Built for the NASA Space Apps Challenge 2026 by a team from Pakistan:
 
-- Syed Hassaan Areeb Kazmi
-- Eman Fatima
-- Mohammad Bin Javed
-- Azam Tariq
-- Hudebia
+| Name | Role |
+|---|---|
+| Syed Hassaan Areeb Kazmi | Team Owner |
+| Azam Tariq | Developer |
+| Eman Fatima | UI/UX Designer |
+| Mohammad Bin Javed | |
+| Hudebia | |
 
 **The challenge, in short:** long missions expose astronauts to radiation, isolation and confinement, altered gravity and a closed, hostile
 environment, and astronauts carry much of the responsibility for spotting changes in themselves. The task is health monitoring software that
