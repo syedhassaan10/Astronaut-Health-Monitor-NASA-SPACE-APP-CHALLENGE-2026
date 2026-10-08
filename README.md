@@ -6,6 +6,7 @@ Decision support, not a diagnosis. Built as a static web app: no backend, no acc
 - **Live demo:** `[PLACEHOLDER: https://your-orbitfit-url.example.com]`
 - **30-second video:** `[PLACEHOLDER: https://your-video-link.example.com]`
 - **Challenge:** NASA Space Apps Challenge 2026, *"Create Health Monitoring Software for Astronauts on Space Missions"*
+- **Team:** Syed Hassaan Areeb Kazmi, Eman Fatima, Mohammad Bin Javed, Azam Tariq, Hudebia (Pakistan)
 
 > Prototype decision-support tool. Not a medical device. Thresholds are demonstration values, not clinically validated.
 
@@ -149,6 +150,21 @@ Not NASA, with thanks: [MediaPipe Pose Landmarker](https://developers.google.com
 No diagnosis. No bone density or muscle mass numbers. Kinematic estimates only. Thresholds are demonstration values, not
 clinically validated. The ARED load is simulated and the Earth link is simulated (browser tabs on one device). See `/about`
 for the full list of limitations and future work (ARED hardware integration, clinical validation, wearable sensor fusion).
+
+## Team
+
+Built for the NASA Space Apps Challenge 2026 by a team from Pakistan:
+
+- Syed Hassaan Areeb Kazmi
+- Eman Fatima
+- Mohammad Bin Javed
+- Azam Tariq
+- Hudebia
+
+**The challenge, in short:** long missions expose astronauts to radiation, isolation and confinement, altered gravity and a closed, hostile
+environment, and astronauts carry much of the responsibility for spotting changes in themselves. The task is health monitoring software that
+gathers health indicators and lets astronauts evaluate and act on their own health status. OrbitFit addresses the gravity, isolation and
+distance hazards through exercise-based, offline self-monitoring (see `/about` for what it covers and what it does not).
 
 ## AI tool usage disclosure
 

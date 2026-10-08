@@ -7,8 +7,16 @@ import { HEALTH_RULES } from '../config/healthRules'
 
 const NAV = [
   ['problem', 'Problem'], ['solution', 'Solution'], ['hazards', 'Hazards addressed'], ['how', 'How it works'],
-  ['benchmark', 'Benchmark'], ['limitations', 'Limitations'], ['claims', 'Claims we avoid'], ['future', 'Future work'],
+  ['benchmark', 'Benchmark'], ['limitations', 'Limitations'], ['claims', 'Claims we avoid'], ['future', 'Future work'], ['team', 'Team'],
 ] as const
+
+export const TEAM: readonly { name: string; country: string }[] = [
+  { name: 'Syed Hassaan Areeb Kazmi', country: 'Pakistan' },
+  { name: 'Eman Fatima', country: 'Pakistan' },
+  { name: 'Mohammad Bin Javed', country: 'Pakistan' },
+  { name: 'Azam Tariq', country: 'Pakistan' },
+  { name: 'Hudebia', country: 'Pakistan' },
+]
 
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
@@ -86,6 +94,12 @@ export default function About() {
       </nav>
 
       <Section id="problem" title="The problem">
+        <p>
+          <B>The challenge</B> (NASA Space Apps 2026): long missions expose astronauts to radiation, isolation and confinement, altered gravity and a closed,
+          hostile environment, and on those missions astronauts carry much of the responsibility for spotting changes in themselves. The task is to build health
+          monitoring software that gathers health indicators and lets astronauts evaluate and act on the status of their own health. OrbitFit takes on the
+          musculoskeletal and behavioural side of that: gravity, isolation and distance (see “Hazards addressed”).
+        </p>
         <p>
           In microgravity, muscles and bones are barely loaded, and both decline unless crews exercise hard and regularly. Today that is managed with
           large devices (such as the ARED resistive machine) and constant support from flight surgeons on the ground.
@@ -224,6 +238,18 @@ export default function About() {
           <li><B>A real link:</B> replace the simulated tab-to-tab channel with a delay-tolerant transport to a real ground station.</li>
         </Ul>
         <p>See <Link className="text-accent underline" to="/sources">Sources</Link> for the NASA references and credits.</p>
+      </Section>
+
+      <Section id="team" title="Team">
+        <p>OrbitFit was built for the NASA Space Apps Challenge 2026 by:</p>
+        <ul className="grid gap-2 sm:grid-cols-2 list-none p-0" aria-label="Team members">
+          {TEAM.map((m) => (
+            <li key={m.name} className="bg-space-900 border border-space-700 rounded-lg px-3 py-2">
+              <span className="text-ink-100 font-semibold">{m.name}</span>
+              <span className="block text-xs text-ink-500">{m.country}</span>
+            </li>
+          ))}
+        </ul>
       </Section>
     </Page>
   )
