@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { REP_CONFIGS } from '../engine/repDetector'
 import { EXERCISES, type ExerciseId } from '../engine/gravityEngine'
 import { useMeasurement } from '../pose/useMeasurement'
@@ -25,10 +26,24 @@ export default function CameraPanel({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const ctx = useMemo(() => ({ crewId, massKg }), [crewId, massKg])
+  const sectionRef = useRef<HTMLElement>(null)
+  const [params, setParams] = useSearchParams()
+  const autoDemo = useRef(false)
   const m = useMeasurement(videoRef, canvasRef, exercise, g, ctx)
   const [demoAvailable, setDemoAvailable] = useState<boolean | null>(null)
   const supported = REP_CONFIGS[exercise] !== undefined
   const active = m.status === 'running'
+
+  // "?demo=1" (from the Quick Start) starts Demo Mode once, as soon as the clip is known to exist.
+  useEffect(() => {
+    if (params.get('demo') !== '1' || autoDemo.current || demoAvailable !== true || !supported || m.status !== 'idle') return
+    autoDemo.current = true
+    sectionRef.current?.scrollIntoView({ block: 'start' })
+    const next = new URLSearchParams(params)
+    next.delete('demo')
+    setParams(next, { replace: true })
+    void m.start({ kind: 'video', url: DEMO_URL, label: 'Demo video' })
+  }, [params, setParams, demoAvailable, supported, m])
 
   // The SPA fallback answers 200 + HTML for missing files, so check the content type.
   useEffect(() => {
@@ -42,7 +57,7 @@ export default function CameraPanel({
   }, [])
 
   return (
-    <section className="panel" aria-label="Camera measurement">
+    <section ref={sectionRef} className="panel scroll-mt-4" aria-label="Camera measurement">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="font-semibold">Camera measurement</h2>
         <span className="label-mono">on-device pose estimate · every rep is saved to the offline logbook as it completes</span>

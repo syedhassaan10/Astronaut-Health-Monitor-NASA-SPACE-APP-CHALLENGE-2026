@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import AlertCard from '../components/AlertCard'
 import AlertLog from '../components/AlertLog'
 import CmoNote from '../components/CmoNote'
@@ -17,6 +18,10 @@ const SEVERITY = { ACT: 0, WATCH: 1 } as const
 
 export default function Cmo() {
   const [day, setDay] = useState(DEMO_DAYS)
+  const { hash } = useLocation()
+  useEffect(() => {
+    if (hash) document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start' })
+  }, [hash])
   const assessments = useAssessments(day)
   const checkins = useCheckins().filter((c) => c.day <= day)
   const latestOf = (crewId: string) =>

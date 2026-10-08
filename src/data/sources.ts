@@ -1,4 +1,5 @@
 ﻿// NASA references used by OrbitFit. URLs were checked against NASA pages / NTRS records.
+// (Non-NASA credits and the challenge-dataset placeholders are further down.)
 export interface Source {
   id: string
   title: string
@@ -54,13 +55,63 @@ export const SOURCES: Source[] = [
     usedFor: 'Isolation and confinement as a hazard: why the check-in tracks stress and mood, and why sustained high stress is surfaced for the Crew Medical Officer.',
   },
   {
-    id: 'demo-video',
-    title: 'Demo Mode clip: "A Woman Doing Squats" (stock video, downscaled)',
-    organization: 'Julia Larson, via Pexels (Pexels License: free to use)',
-    url: 'https://www.pexels.com/video/a-woman-doing-squats-6454275/',
+    id: 'hrp-hazards',
+    title: '5 Hazards of Human Spaceflight',
+    organization: 'NASA Human Research Program',
+    url: 'https://www.nasa.gov/hrp/hazards',
     usedFor:
-      'Sample exercise video bundled in public/demo so Demo Mode runs without a webcam. Re-encoded to 480x854 for size; not a NASA source.',
+      'Frames the problem: gravity (and the lack of it), isolation and confinement, and distance from Earth are the three hazards OrbitFit addresses. Radiation and closed or hostile environments are not addressed.',
   },
 ]
 
 export const SOURCE_BY_ID: Record<string, Source> = Object.fromEntries(SOURCES.map((s) => [s.id, s]))
+
+/** Non-NASA material the prototype is built on, with the licence terms that apply. */
+export interface Credit {
+  id: string
+  title: string
+  author: string
+  url: string
+  licence: string
+  usedFor: string
+}
+
+export const CREDITS: Credit[] = [
+  {
+    id: 'mediapipe',
+    title: 'MediaPipe Pose Landmarker (pose_landmarker_lite model and @mediapipe/tasks-vision)',
+    author: 'Google (MediaPipe / Google AI Edge)',
+    url: 'https://developers.google.com/edge/mediapipe/solutions/vision/pose_landmarker',
+    licence: 'Models: Creative Commons Attribution 4.0. Code: Apache 2.0 (as stated on the guide page).',
+    usedFor:
+      'On-device body pose estimation. The model file and WebAssembly runtime are served from this app’s own origin and run in the browser; no video or image ever leaves the device.',
+  },
+  {
+    id: 'demo-video',
+    title: 'Demo Mode clip: “A Woman Doing Squats” (stock video, downscaled to 480x854)',
+    author: 'Julia Larson, via Pexels',
+    url: 'https://www.pexels.com/video/a-woman-doing-squats-6454275/',
+    licence: 'Pexels License (free to use).',
+    usedFor: 'Sample exercise video bundled in public/demo so Demo Mode works without a webcam. It is not a NASA source.',
+  },
+]
+
+/**
+ * Datasets named in the official 2026 NASA Space Apps challenge statement.
+ * PLACEHOLDERS: fill in from the statement. OrbitFit currently uses NO external dataset at
+ * runtime; all demo data is synthetic and generated in src/data/demoSeed.ts.
+ */
+export interface ChallengeDataset {
+  id: string
+  name: string
+  url: string
+  usedFor: string
+}
+
+export const CHALLENGE_STATEMENT_SITE = 'https://www.spaceappschallenge.org/'
+
+export const CHALLENGE_DATASETS: ChallengeDataset[] = [
+  { id: 'dataset-1', name: '[PLACEHOLDER] Dataset 1 name', url: '', usedFor: '[PLACEHOLDER] How OrbitFit uses it, or “not used yet”.' },
+  { id: 'dataset-2', name: '[PLACEHOLDER] Dataset 2 name', url: '', usedFor: '[PLACEHOLDER] How OrbitFit uses it, or “not used yet”.' },
+  { id: 'dataset-3', name: '[PLACEHOLDER] Dataset 3 name', url: '', usedFor: '[PLACEHOLDER] How OrbitFit uses it, or “not used yet”.' },
+]

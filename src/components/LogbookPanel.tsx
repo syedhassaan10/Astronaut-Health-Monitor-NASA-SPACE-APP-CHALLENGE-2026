@@ -76,7 +76,7 @@ export default function LogbookPanel() {
   })
 
   return (
-    <section className="panel" aria-label="Offline logbook">
+    <section id="logbook" className="panel scroll-mt-4" aria-label="Offline logbook">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="font-semibold">Offline logbook</h2>
         <span className="label-mono">stored in this browser · works without a network</span>
