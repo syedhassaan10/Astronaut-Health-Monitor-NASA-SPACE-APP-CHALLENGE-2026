@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { AdaptiveSampler, DEFAULT_SAMPLER, type SamplingMode } from './adaptiveSampler'
 import { RepDetector, REP_CONFIGS, type RepMetrics } from './repDetector'
 import { asymmetryLevel, assessRep, depthLevel, tempoLevel } from './formFeedback'

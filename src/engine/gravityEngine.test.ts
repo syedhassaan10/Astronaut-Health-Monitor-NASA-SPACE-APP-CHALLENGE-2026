@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import {
   ARED_MAX_KG, EXERCISES, buildPlan, clampG, effectiveBodyweightN, targetAredLoadKg, tempoForG, volumeForG,
 } from './gravityEngine'

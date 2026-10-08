@@ -1,4 +1,4 @@
-﻿// Orientation-independent joint angles from MediaPipe 3D WORLD landmarks.
+// Orientation-independent joint angles from MediaPipe 3D WORLD landmarks.
 // World landmarks are metric (metres) with the origin at the hip centre, and the
 // angle between two bone vectors is invariant to rotation, so nothing here uses
 // the screen's "up" direction or vertical position (safe in microgravity).

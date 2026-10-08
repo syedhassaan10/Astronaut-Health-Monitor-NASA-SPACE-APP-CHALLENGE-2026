@@ -1,4 +1,4 @@
-﻿// Placeholder crew roster (demo data is seeded in Phase 8).
+// Placeholder crew roster (demo data is seeded in Phase 8).
 export interface CrewMember {
   id: string
   name: string

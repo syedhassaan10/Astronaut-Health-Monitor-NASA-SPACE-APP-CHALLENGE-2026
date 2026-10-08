@@ -1,4 +1,4 @@
-﻿export type SamplingMode = 'full' | 'adaptive'
+export type SamplingMode = 'full' | 'adaptive'
 
 export interface SamplerConfig {
   /** Adaptive BASE: run inference on every Nth frame. */

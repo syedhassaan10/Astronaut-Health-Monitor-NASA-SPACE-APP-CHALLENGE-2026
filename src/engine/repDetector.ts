@@ -1,4 +1,4 @@
-﻿import type { ExerciseId } from './gravityEngine'
+import type { ExerciseId } from './gravityEngine'
 
 // Knee-angle state machine: top → bottom → top, with hysteresis between the
 // "leave top" and "back at top" thresholds so jitter around one value cannot

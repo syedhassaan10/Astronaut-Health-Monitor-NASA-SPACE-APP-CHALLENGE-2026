@@ -1,4 +1,4 @@
-﻿import { useId, useState } from 'react'
+import { useId, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 // "Why?" tooltip: explains a number, shows the (simplified) formula, links to /sources.

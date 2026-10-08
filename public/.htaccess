@@ -1,0 +1,75 @@
+# OrbitFit: Apache rules for static hosting (cPanel). There is no server-side code in this project:
+# the server only delivers files, everything else runs in the visitor's browser.
+#
+# Upload the CONTENTS of dist/ (this file included) to the site's web root or to a subfolder.
+# Every block is wrapped in <IfModule> so a module that is missing on your host cannot cause a 500 error.
+
+DirectoryIndex index.html
+
+# ---------------------------------------------------------------------------------------------
+# MIME types. Browsers refuse to run WebAssembly that is not served as application/wasm.
+# ---------------------------------------------------------------------------------------------
+<IfModule mod_mime.c>
+  AddType application/wasm .wasm
+  AddType application/octet-stream .task
+  AddType application/manifest+json .webmanifest
+  AddType text/javascript .js .mjs
+  AddType application/json .json
+  AddType image/svg+xml .svg
+  AddType video/mp4 .mp4
+</IfModule>
+
+# ---------------------------------------------------------------------------------------------
+# Compression for text and WebAssembly (the .task model and .mp4 are already compressed).
+# ---------------------------------------------------------------------------------------------
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json application/manifest+json image/svg+xml application/wasm
+</IfModule>
+
+# ---------------------------------------------------------------------------------------------
+# HTTPS and single-page-app routing
+# ---------------------------------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # 1. Force HTTPS. The camera and the service worker (offline mode) only work on a secure origin.
+  #    X-Forwarded-Proto is honoured so this also works behind a proxy or CDN that terminates TLS.
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https [NC]
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # 2. Single-page-app fallback: /cmo, /downlink, /about ... are not real files, so they are served
+  #    index.html and the app's router shows the right page (deep links do not 404).
+  #    Requests that end in a file extension (a missing .js, .wasm, .png ...) are NOT rewritten:
+  #    they must be a real 404, not an HTML page pretending to be a script.
+  #    The relative target keeps this working in a subfolder too (https://example.com/orbitfit/).
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_URI} !\.[A-Za-z0-9]{1,8}$
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# ---------------------------------------------------------------------------------------------
+# Caching and headers
+# ---------------------------------------------------------------------------------------------
+<IfModule mod_headers.c>
+  # Build output has a content hash in its name (index-DHUbNuEN.js), so it can be cached for a year.
+  <FilesMatch "-[A-Za-z0-9_-]{8}\.(js|css|svg|png|jpg|woff2?)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  # Large, rarely-changing files: one month. (The service worker also versions them itself.)
+  <FilesMatch "\.(wasm|task|mp4)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+
+  # The entry points must always be re-checked so a new deployment is picked up straight away.
+  <FilesMatch "^(index\.html|sw\.js|registerSW\.js|manifest\.webmanifest)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "no-referrer"
+  # The app needs the camera (its own origin only) and nothing else.
+  Header always set Permissions-Policy "camera=(self), microphone=(), geolocation=()"
+</IfModule>

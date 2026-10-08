@@ -1,4 +1,4 @@
-﻿import { NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { useApp } from '../state/AppState'
 import { CREW } from '../data/crew'
 import { LOCATIONS } from '../data/locations'

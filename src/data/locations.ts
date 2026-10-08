@@ -1,4 +1,4 @@
-﻿// Simplified location presets (gravity as a fraction of Earth g).
+// Simplified location presets (gravity as a fraction of Earth g).
 // Phase 2 builds the countermeasure engine on top of these.
 export interface Location {
   id: string

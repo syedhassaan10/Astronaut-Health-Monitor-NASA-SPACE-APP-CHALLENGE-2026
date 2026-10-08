@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { RepDetector, REP_CONFIGS, type RepMetrics, type RepResult } from './repDetector'
 
 const cfg = REP_CONFIGS.squat!

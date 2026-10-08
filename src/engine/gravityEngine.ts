@@ -1,4 +1,4 @@
-﻿// Simplified PROTOTYPE model of gravity-dependent resistance training.
+// Simplified PROTOTYPE model of gravity-dependent resistance training.
 // We SIMULATE an ARED-style target; we do not control hardware, and every
 // constant below is a demonstration value, not clinically validated.
 

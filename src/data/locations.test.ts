@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { LOCATIONS } from './locations'
 
 describe('location presets', () => {

@@ -1,4 +1,4 @@
-﻿import type { RepConfig, RepMetrics } from './repDetector'
+import type { RepConfig, RepMetrics } from './repDetector'
 
 export type Level = 'green' | 'amber' | 'red'
 

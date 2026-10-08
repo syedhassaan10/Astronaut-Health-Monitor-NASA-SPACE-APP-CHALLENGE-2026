@@ -1,4 +1,4 @@
-﻿// Copies MediaPipe WASM runtime from node_modules into /public so it is served
+// Copies MediaPipe WASM runtime from node_modules into /public so it is served
 // from our own origin (never a CDN). Runs automatically after `npm install`.
 import { cpSync, existsSync, mkdirSync } from 'node:fs'
 const src = 'node_modules/@mediapipe/tasks-vision/wasm'

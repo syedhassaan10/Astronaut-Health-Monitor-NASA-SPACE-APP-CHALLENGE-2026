@@ -1,0 +1,13 @@
+# Normalise line endings so a clone behaves the same on Windows, Mac and Linux.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.sh text eol=lf
+
+# The committed build output and vendored binaries are byte-exact: never touch them.
+dist/** -text
+public/mediapipe/** -text
+*.wasm binary
+*.task binary
+*.mp4 binary
+*.png binary
+*.jpg binary

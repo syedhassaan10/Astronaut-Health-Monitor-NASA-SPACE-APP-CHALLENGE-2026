@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { LM, angleDeg, jointAngles, meanVisibility, type Vec3 } from './poseMath'
 
 const v = (x: number, y: number, z: number, visibility = 1): Vec3 => ({ x, y, z, visibility })

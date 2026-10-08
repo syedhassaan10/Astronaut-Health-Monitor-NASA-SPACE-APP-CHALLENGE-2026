@@ -1,4 +1,4 @@
-﻿import type { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 export default function Page({ title, subtitle, children }: { title: string; subtitle?: string; children?: ReactNode }) {
   return (

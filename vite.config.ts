@@ -1,10 +1,18 @@
-﻿import { defineConfig } from 'vitest/config'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // Base path is configurable for subdomain/subfolder hosting (default "/").
-const base = process.env.VITE_BASE ?? '/'
+//   subdomain root:  (nothing)                 -> https://orbitfit.example.com/
+//   subfolder:       VITE_BASE=/orbitfit/      -> https://example.com/orbitfit/
+// Forgiving about slashes: "orbitfit", "/orbitfit" and "/orbitfit/" all mean the same thing.
+function normaliseBase(v: string | undefined): string {
+  const t = (v ?? '').trim()
+  if (t === '' || t === '/') return '/'
+  return `/${t.replace(/^\/+|\/+$/g, '')}/`
+}
+const base = normaliseBase(process.env.VITE_BASE)
 
 export default defineConfig({
   base,

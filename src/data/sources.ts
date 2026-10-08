@@ -1,4 +1,4 @@
-﻿// NASA references used by OrbitFit. URLs were checked against NASA pages / NTRS records.
+// NASA references used by OrbitFit. URLs were checked against NASA pages / NTRS records.
 // (Non-NASA credits and the challenge-dataset placeholders are further down.)
 export interface Source {
   id: string

@@ -1,4 +1,4 @@
-﻿import type { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { EXERCISES, type ExerciseId, buildPlan } from '../engine/gravityEngine'
 import WhyTip from './WhyTip'
 

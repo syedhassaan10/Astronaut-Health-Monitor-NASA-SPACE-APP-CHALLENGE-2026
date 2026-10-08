@@ -1,4 +1,4 @@
-﻿// Rolling performance statistics for the HUD and the benchmark.
+// Rolling performance statistics for the HUD and the benchmark.
 export interface PerfSnapshot {
   cameraFps: number
   inferencePerSec: number
