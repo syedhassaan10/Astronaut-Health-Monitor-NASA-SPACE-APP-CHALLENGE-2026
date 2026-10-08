@@ -1,6 +1,0 @@
-{
-  "version": "0.0.1",
-  "configurations": [
-    { "name": "orbitfit-preview", "runtimeExecutable": "npm", "runtimeArgs": ["run", "preview"], "port": 4173 }
-  ]
-}

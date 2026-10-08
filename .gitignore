@@ -3,3 +3,7 @@ node_modules
 .DS_Store
 # dist/ is intentionally committed (prebuilt local backup, see README)
 dist-*/
+
+# Build caches and local tool config
+*.tsbuildinfo
+.claude/
