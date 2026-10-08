@@ -5,7 +5,7 @@ import CheckinSummary from './CheckinSummary'
 import { useAssessments } from '../state/useAssessments'
 import { useCheckins } from '../state/useCheckins'
 
-/** The astronaut's own trend status (seeded demo data until the logbook lands in Phase 6). */
+/** The astronaut's own trend status, computed from the offline logbook (demo history + their own sessions). */
 export default function MyStatus({ crewId }: { crewId: string }) {
   const a = useAssessments(DEMO_DAYS)[crewId]
   const mine = useCheckins().filter((c) => c.crewId === crewId)
@@ -16,7 +16,7 @@ export default function MyStatus({ crewId }: { crewId: string }) {
       <div className="flex flex-wrap items-center gap-3">
         <h2 className="font-semibold">My trend status</h2>
         <StatusBadge status={a.status} large />
-        <span className="label-mono ml-auto">estimate · decision support · mission day {DEMO_DAYS} (seeded demo data)</span>
+        <span className="label-mono ml-auto">estimate · decision support · mission day {DEMO_DAYS} (demo history + your sessions)</span>
       </div>
       <div className="mt-2"><CheckinSummary checkin={latest} /></div>
       {a.alerts.length === 0 ? (

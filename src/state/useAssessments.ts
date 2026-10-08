@@ -1,20 +1,26 @@
 import { useMemo } from 'react'
-import { CREW } from '../data/crew'
-import { DEMO_SESSIONS } from '../data/demoSeed'
-import { assessCrew } from '../engine/changeDetection'
 import { HEALTH_RULES } from '../config/healthRules'
-import type { CrewAssessment } from '../engine/healthTypes'
+import { CREW } from '../data/crew'
+import { db } from '../db/db'
+import { loadSessionRecords } from '../db/repo'
+import { assessCrew } from '../engine/changeDetection'
+import type { CrewAssessment, SessionRecord } from '../engine/healthTypes'
 import { useCheckins } from './useCheckins'
+import { useLive } from './useLive'
 
-/**
- * Assessments for every crew member as of a mission day, from the seeded demo sessions and
- * the daily check-ins (Phase 6 swaps the session source for the IndexedDB logbook).
- */
+/** Sessions + reps from the logbook as health-rule input. Re-runs whenever a rep is written. */
+export function useSessionRecords(): SessionRecord[] {
+  return useLive(() => loadSessionRecords(db)) ?? EMPTY
+}
+const EMPTY: SessionRecord[] = []
+
+/** Assessments for every crew member as of a mission day, computed from the stored logbook. */
 export function useAssessments(day: number): Record<string, CrewAssessment> {
+  const records = useSessionRecords()
   const checkins = useCheckins()
   return useMemo(() => {
-    const sessions = DEMO_SESSIONS.filter((s) => s.day <= day)
+    const sessions = records.filter((s) => s.day <= day)
     const cis = checkins.filter((c) => c.day <= day)
     return Object.fromEntries(CREW.map((c) => [c.id, assessCrew(sessions, c.id, HEALTH_RULES, cis)]))
-  }, [day, checkins])
+  }, [records, checkins, day])
 }

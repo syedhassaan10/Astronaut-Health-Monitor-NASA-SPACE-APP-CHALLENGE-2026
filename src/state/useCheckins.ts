@@ -1,9 +1,10 @@
-import { useMemo, useSyncExternalStore } from 'react'
-import { SEED_CHECKINS, getUserCheckins, mergeCheckins, subscribe } from './checkinStore'
+import { db } from '../db/db'
 import type { CheckIn } from '../engine/healthTypes'
+import { useLive } from './useLive'
 
-/** All check-ins (seeded + user entered), live-updating when a check-in is saved. */
+/** All check-ins from the logbook, live-updating when one is saved (here or in another tab). */
 export function useCheckins(): CheckIn[] {
-  const user = useSyncExternalStore(subscribe, getUserCheckins, getUserCheckins)
-  return useMemo(() => mergeCheckins(SEED_CHECKINS, user), [user])
+  return useLive(() => db.checkins.toArray()) ?? EMPTY
 }
+
+const EMPTY: CheckIn[] = []

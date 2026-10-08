@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import AlertCard from '../components/AlertCard'
+import AlertLog from '../components/AlertLog'
+import CmoNote from '../components/CmoNote'
+import LogbookPanel from '../components/LogbookPanel'
 import Page from '../components/Page'
 import CheckinSummary from '../components/CheckinSummary'
 import CheckinTrend from '../components/CheckinTrend'
@@ -81,6 +84,17 @@ export default function Cmo() {
           <AlertCard alert={al} />
         </div>
       ))}
+
+      <h2 className="font-semibold pt-2">Alert log</h2>
+      <p className="text-sm text-ink-300 -mt-3">Every alert, with the mission day it was first raised. Escalations are logged separately. Acknowledgements are saved.</p>
+      <AlertLog />
+
+      <h2 className="font-semibold pt-2">CMO notes</h2>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {CREW.map((c) => <CmoNote key={c.id} crewId={c.id} name={c.name} />)}
+      </div>
+
+      <LogbookPanel />
     </Page>
   )
 }

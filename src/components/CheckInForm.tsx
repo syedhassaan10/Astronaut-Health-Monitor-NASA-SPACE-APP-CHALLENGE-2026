@@ -1,7 +1,7 @@
 import { useEffect, useId, useState, type ReactNode } from 'react'
 import type { BodyLocation, CheckIn } from '../engine/healthTypes'
 import { LOCATION_LABEL } from '../engine/checkinRules'
-import { TODAY, saveCheckin } from '../state/checkinStore'
+import { TODAY, saveCheckin } from '../db/repo'
 import { useCheckins } from '../state/useCheckins'
 
 function Slider({ label, low, high, value, onChange, hint }: {
@@ -51,7 +51,7 @@ export default function CheckInForm({ crewId, crewName }: { crewId: string; crew
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [crewId])
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault()
     if (pain > 0 && location === '') {
       setError('Please choose where it hurts.')
@@ -62,8 +62,12 @@ export default function CheckInForm({ crewId, crewName }: { crewId: string; crew
       crewId, day: TODAY, sleep, fatigue, pain, stress,
       painLocation: pain > 0 ? (location || 'other') : null,
     }
-    saveCheckin(entry)
-    setSaved(true)
+    try {
+      await saveCheckin(entry)
+      setSaved(true)
+    } catch {
+      setError('Could not save to the logbook. Please try again.')
+    }
   }
 
   return (

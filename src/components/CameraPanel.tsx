@@ -1,20 +1,31 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { REP_CONFIGS } from '../engine/repDetector'
 import { EXERCISES, type ExerciseId } from '../engine/gravityEngine'
 import { useMeasurement } from '../pose/useMeasurement'
 import { LEVEL_COLOR } from '../pose/drawOverlay'
 import PerfHud from './PerfHud'
+import ResumeBanner from './ResumeBanner'
 import RepTable from './RepTable'
 
 const DEMO_URL = `${import.meta.env.BASE_URL}demo/squat.mp4`
 
 const btn = 'px-3 py-1.5 rounded-md text-sm border border-space-600 text-ink-100 hover:bg-space-700 disabled:opacity-40 disabled:hover:bg-transparent'
 
-export default function CameraPanel({ exercise, g }: { exercise: ExerciseId; g: number }) {
+export default function CameraPanel({
+  exercise, g, crewId, massKg, onSwitch,
+}: {
+  exercise: ExerciseId
+  g: number
+  crewId: string
+  massKg: number
+  /** Called before resuming so the page can select the session's crew member and exercise. */
+  onSwitch: (crewId: string, exercise: ExerciseId) => void
+}) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
-  const m = useMeasurement(videoRef, canvasRef, exercise, g)
+  const ctx = useMemo(() => ({ crewId, massKg }), [crewId, massKg])
+  const m = useMeasurement(videoRef, canvasRef, exercise, g, ctx)
   const [demoAvailable, setDemoAvailable] = useState<boolean | null>(null)
   const supported = REP_CONFIGS[exercise] !== undefined
   const active = m.status === 'running'
@@ -34,8 +45,23 @@ export default function CameraPanel({ exercise, g }: { exercise: ExerciseId; g: 
     <section className="panel" aria-label="Camera measurement">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="font-semibold">Camera measurement</h2>
-        <span className="label-mono">on-device pose estimate · nothing leaves this device</span>
+        <span className="label-mono">on-device pose estimate · every rep is saved to the offline logbook as it completes</span>
       </div>
+
+      <ResumeBanner
+        busy={m.status === 'running' || m.status === 'loading'}
+        resumed={m.resumed}
+        onResume={(s) => {
+          onSwitch(s.crewId, s.exercise)
+          void m.resume(s)
+        }}
+        onFinish={(s) => void m.closeUnfinished(s)}
+      />
+      {m.logError && (
+        <p role="alert" className="mt-2 text-sm text-act">
+          Logbook write failed: {m.logError}. Recent reps may not be saved. Check that browser storage is not full or blocked.
+        </p>
+      )}
 
       {!supported && (
         <p role="note" className="mt-2 text-sm text-watch">

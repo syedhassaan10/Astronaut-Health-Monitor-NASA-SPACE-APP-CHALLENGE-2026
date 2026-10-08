@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
 import { AdaptiveSampler, DEFAULT_SAMPLER, type SamplingMode } from '../engine/adaptiveSampler'
-import { assessRep, targetsFor, type FormAssessment, type Level } from '../engine/formFeedback'
-import { tempoForG, type ExerciseId } from '../engine/gravityEngine'
+import { assessRep, targetsFor, type Level } from '../engine/formFeedback'
+import { buildPlan, tempoForG, volumeForG, type ExerciseId } from '../engine/gravityEngine'
 import { PerfStats, type PerfSnapshot } from '../engine/perfStats'
 import { jointAngles, meanVisibility, type Vec3 } from '../engine/poseMath'
 import { REP_CONFIGS, RepDetector, type RepMetrics } from '../engine/repDetector'
+import { addRep, finishSession, repId, sessionReps, startSession } from '../db/repo'
+import type { RepRow, SessionRow } from '../db/schema'
 import { makeBenchResult, saveBenchmark, type BenchResult, type BenchRow } from '../data/benchmark'
 import { drawOverlay } from './drawOverlay'
 import { loadPoseLandmarker } from './poseLandmarker'
@@ -12,11 +14,26 @@ import { loadPoseLandmarker } from './poseLandmarker'
 export type Source = { kind: 'webcam' } | { kind: 'video'; url: string; label: string; revoke?: boolean }
 export type Status = 'idle' | 'loading' | 'running' | 'error'
 
-export interface RepRecord extends RepMetrics {
-  assessment: FormAssessment
-  exercise: ExerciseId
-  gravityG: number
+/** A rep as shown in the rep log (live, or restored from the logbook when resuming). */
+export interface RepRecord {
+  repNo: number
+  minKneeAngle: number
+  eccentricS: number
+  concentricS: number
+  asymmetryDeg: number
+  confidence: number
+  assessment: { overall: Level; score: number; flags: string[] }
 }
+
+export interface MeasureContext {
+  crewId: string
+  massKg: number
+}
+
+const toRecord = (r: RepRow): RepRecord => ({
+  repNo: r.repNo, minKneeAngle: r.minKneeAngle, eccentricS: r.eccentricS, concentricS: r.concentricS,
+  asymmetryDeg: r.asymmetry, confidence: r.confidence, assessment: { overall: r.level, score: r.formScore, flags: r.flags },
+})
 
 export interface Live {
   present: boolean
@@ -39,6 +56,8 @@ const MIN_FRAME_CONF = 0.3
 const UNRELIABLE_CONF = 0.5
 const EMPTY_LIVE: Live = { present: false, knee: null, confidence: 0, level: 'neutral' }
 
+const errMsg = (e: unknown) => (e instanceof Error ? e.message : String(e))
+
 type Cancel = () => void
 function scheduleFrame(video: HTMLVideoElement, cb: (now: number) => void): Cancel {
   if ('requestVideoFrameCallback' in video) {
@@ -54,6 +73,7 @@ export function useMeasurement(
   canvasRef: RefObject<HTMLCanvasElement | null>,
   exercise: ExerciseId,
   g: number,
+  ctx: MeasureContext,
 ) {
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState<string | null>(null)
@@ -67,6 +87,8 @@ export function useMeasurement(
   const [bench, setBench] = useState<BenchState | null>(null)
   const [benchResult, setBenchResult] = useState<BenchResult | null>(null)
   const [bannerUntil, setBannerUntil] = useState(0)
+  const [logError, setLogError] = useState<string | null>(null)
+  const [resumed, setResumed] = useState<SessionRow | null>(null)
 
   // Mutable state used inside the frame loop (no re-render per frame).
   const sampler = useRef(new AdaptiveSampler('adaptive', DEFAULT_SAMPLER))
@@ -87,6 +109,16 @@ export function useMeasurement(
   const benchRef = useRef<{ phase: 'full' | 'adaptive'; startedAt: number; rows: BenchRow[]; repsAtStart: number; source: string } | null>(null)
   const repCount = useRef(0)
   const sourceRef = useRef<Source | null>(null)
+  const ctxRef = useRef(ctx)
+  /** The session currently being recorded (null when the camera is off). */
+  const sessionRef = useRef<SessionRow | null>(null)
+  /** An unfinished session the user chose to resume; the next start() continues it. */
+  const pendingResume = useRef<SessionRow | null>(null)
+  const nextRepNo = useRef(1)
+
+  useEffect(() => {
+    ctxRef.current = ctx
+  }, [ctx])
 
   useEffect(() => {
     latest.current = { exercise, g }
@@ -114,6 +146,9 @@ export function useMeasurement(
     benchRef.current = null
     setBench(null)
     setStatus('idle')
+    const done = sessionRef.current
+    sessionRef.current = null
+    if (done) void finishSession(done.id).catch((e) => setLogError(errMsg(e)))
   }, [videoRef, canvasRef])
 
   useEffect(() => stop, [stop])
@@ -175,11 +210,31 @@ export function useMeasurement(
     if (!det) return
     const res = det.push({ tMs: now, knee: angles.knee, asymmetryDeg: Math.abs(angles.kneeL - angles.kneeR), confidence })
     if (!res) return
+    // Reps made during the 30 s benchmark are measurement tests, not workout data: never logged.
+    const logging = benchRef.current === null
+
+    /** Writes the rep to IndexedDB right now (not at session end) so a crash cannot lose it. */
+    const persist = (m: RepMetrics, formScore: number, flags: string[], level: RepRow['level']): number | null => {
+      const session = sessionRef.current
+      if (!session || !logging) return null
+      const { exercise: ex, g: gg } = latest.current
+      const repNo = nextRepNo.current++
+      const row: RepRow = {
+        id: repId(session.id, repNo), sessionId: session.id, crewId: session.crewId, exercise: ex, timestamp: Date.now(),
+        gravityG: gg, targetLoadKg: buildPlan(ctxRef.current.massKg, gg, ex).targetLoadKg, repNo,
+        minKneeAngle: m.minKneeAngle, eccentricS: m.eccentricS, concentricS: m.concentricS,
+        asymmetry: m.asymmetryDeg, confidence: m.confidence, formScore, flags, level,
+      }
+      addRep(row).then(() => setLogError(null), (e) => setLogError(errMsg(e)))
+      return repNo
+    }
+
     if (res.kind === 'partial') {
       setPartials((n) => n + 1)
     } else if (res.kind === 'unreliable') {
       setRejected((n) => n + 1)
       setBannerUntil(performance.now() + 5000)
+      persist(res.rep, 0, ['low-confidence'], 'red') // kept for the audit trail; the rules ignore low-confidence reps
     } else {
       const { exercise: ex, g: gg } = latest.current
       const cfg = REP_CONFIGS[ex]
@@ -187,7 +242,14 @@ export function useMeasurement(
       const assessment = assessRep(res.rep, targetsFor(cfg, tempoForG(gg)))
       lastLevel.current = assessment.overall
       repCount.current += 1
-      setReps((r) => [...r, { ...res.rep, assessment, exercise: ex, gravityG: gg }])
+      const repNo = persist(res.rep, assessment.score, assessment.flags, assessment.overall)
+      if (repNo !== null) {
+        setReps((r) => [...r, {
+          repNo, minKneeAngle: res.rep.minKneeAngle, eccentricS: res.rep.eccentricS, concentricS: res.rep.concentricS,
+          asymmetryDeg: res.rep.asymmetryDeg, confidence: res.rep.confidence,
+          assessment: { overall: assessment.overall, score: assessment.score, flags: assessment.flags },
+        }])
+      }
     }
   }, [])
 
@@ -258,7 +320,11 @@ export function useMeasurement(
       stop()
       setError(null)
       setStatus('loading')
-      setReps([])
+      const pending = pendingResume.current
+      if (!pending) {
+        setReps([])
+        nextRepNo.current = 1
+      }
       setPartials(0)
       setRejected(0)
       setBannerUntil(0)
@@ -287,6 +353,20 @@ export function useMeasurement(
         }
         video.playsInline = true
         await video.play()
+        // Open the logbook session only now that the camera/video is really running.
+        if (pending) {
+          sessionRef.current = pending // continue the unfinished session; it is still 'active' in the DB
+          pendingResume.current = null
+          setResumed(null)
+        } else {
+          const { exercise: ex, g: gg } = latest.current
+          const v = volumeForG(gg)
+          sessionRef.current = await startSession({
+            crewId: ctxRef.current.crewId, exercise: ex, gravityG: gg,
+            targetLoadKg: buildPlan(ctxRef.current.massKg, gg, ex).targetLoadKg,
+            prescribedReps: v.sets * v.reps, source: source.kind === 'webcam' ? 'webcam' : 'video',
+          })
+        }
         const cfg = REP_CONFIGS[latest.current.exercise]
         detector.current = cfg ? new RepDetector(cfg) : null
         sampler.current.reset()
@@ -304,6 +384,51 @@ export function useMeasurement(
     },
     [videoRef, stop, loop],
   )
+
+  /** Restores an unfinished session's reps; the next start() (webcam, demo or file) continues it. */
+  const resume = useCallback(async (session: SessionRow) => {
+    const rows = await sessionReps(session.id)
+    pendingResume.current = session
+    nextRepNo.current = rows.reduce((m, r) => Math.max(m, r.repNo), 0) + 1
+    setReps(rows.filter((r) => !r.flags.includes('low-confidence')).map(toRecord))
+    setResumed(session)
+  }, [])
+
+  /** Closes an unfinished session without resuming it. */
+  const closeUnfinished = useCallback(async (session: SessionRow) => {
+    if (pendingResume.current?.id === session.id) {
+      pendingResume.current = null
+      setResumed(null)
+      setReps([])
+    }
+    await finishSession(session.id)
+  }, [])
+
+  // If the crew member, exercise or gravity changes while recording, close that session and
+  // open a fresh one (the camera keeps running) so each session has one set of conditions.
+  const lastCtx = useRef({ crewId: ctx.crewId, exercise, g })
+  useEffect(() => {
+    const prev = lastCtx.current
+    lastCtx.current = { crewId: ctx.crewId, exercise, g }
+    const session = sessionRef.current
+    if (!running.current || !session) return
+    if (prev.crewId === ctx.crewId && prev.exercise === exercise && Math.abs(prev.g - g) < 0.001) return
+    const v = volumeForG(g)
+    sessionRef.current = null
+    nextRepNo.current = 1
+    setReps([])
+    void (async () => {
+      try {
+        await finishSession(session.id)
+        sessionRef.current = await startSession({
+          crewId: ctx.crewId, exercise, gravityG: g, targetLoadKg: buildPlan(ctx.massKg, g, exercise).targetLoadKg,
+          prescribedReps: v.sets * v.reps, source: session.source === 'webcam' ? 'webcam' : 'video',
+        })
+      } catch (e) {
+        setLogError(errMsg(e))
+      }
+    })()
+  }, [ctx.crewId, ctx.massKg, exercise, g])
 
   const setMode = useCallback((m: SamplingMode) => {
     sampler.current.setMode(m)
@@ -333,5 +458,5 @@ export function useMeasurement(
 
   const bannerVisible = status === 'running' && ((live.present && live.confidence < UNRELIABLE_CONF) || performance.now() < bannerUntil)
 
-  return { status, error, sourceLabel, mode, setMode, reps, partials, rejected, live, stats, bench, benchResult, bannerVisible, start, stop, startBenchmark }
+  return { logError, resumed, resume, closeUnfinished, status, error, sourceLabel, mode, setMode, reps, partials, rejected, live, stats, bench, benchResult, bannerVisible, start, stop, startBenchmark }
 }

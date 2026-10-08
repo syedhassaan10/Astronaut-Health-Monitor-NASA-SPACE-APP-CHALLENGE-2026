@@ -29,7 +29,7 @@ export default function Crew() {
       <CheckInForm crewId={member.id} crewName={member.name} />
       <MyStatus crewId={member.id} />
       <CountermeasureCard massKg={member.massKg} g={a.g} exercise={exercise} />
-      <CameraPanel exercise={exercise} g={a.g} />
+      <CameraPanel exercise={exercise} g={a.g} crewId={member.id} massKg={member.massKg} onSwitch={(crewId, ex) => { a.setCrewId(crewId); setExercise(ex) }} />
     </Page>
   )
 }

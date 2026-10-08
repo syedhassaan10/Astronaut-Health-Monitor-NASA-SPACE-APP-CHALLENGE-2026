@@ -4,6 +4,8 @@ import Header from './components/Header'
 import Footer from './components/Footer'
 import QuickStart from './components/QuickStart'
 import { useApp } from './state/AppState'
+import AlertLogSync from './state/AlertLogSync'
+import { useDbReady } from './state/useDbReady'
 
 // Route-level code splitting keeps the first bundle small; every chunk is still
 // precached by the service worker, so nothing here needs the network offline.
@@ -15,6 +17,7 @@ const Sources = lazy(() => import('./pages/Sources'))
 
 export default function App() {
   const a = useApp()
+  const dbState = useDbReady()
   const [showQS, setShowQS] = useState(!a.quickStartDismissed)
   const close = () => {
     setShowQS(false)
@@ -28,6 +31,16 @@ export default function App() {
       <Header onQuickStart={() => setShowQS(true)} />
       <main id="main" className="flex-1 mx-auto w-full max-w-7xl px-4 py-6">
         {showQS && <QuickStart onClose={close} />}
+        {dbState.status === 'loading' && <p role="status" className="text-ink-500">Opening logbook…</p>}
+        {dbState.status === 'error' && (
+          <p role="alert" className="panel border-act text-act">
+            The offline logbook could not be opened: {dbState.message}. OrbitFit stores its data in this browser&apos;s IndexedDB, so it needs
+            storage to be allowed (it does not work in some private windows).
+          </p>
+        )}
+        {dbState.status === 'ready' && (
+          <>
+          <AlertLogSync />
         <Suspense fallback={<p role="status" className="text-ink-500">Loading…</p>}>
         <Routes>
           <Route path="/" element={<Navigate to="/crew" replace />} />
@@ -39,6 +52,8 @@ export default function App() {
           <Route path="*" element={<Navigate to="/crew" replace />} />
         </Routes>
         </Suspense>
+          </>
+        )}
       </main>
       <Footer />
     </div>

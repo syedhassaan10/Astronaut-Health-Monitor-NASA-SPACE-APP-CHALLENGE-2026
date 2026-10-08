@@ -1,8 +1,8 @@
 import type { BodyLocation, CheckIn, RepSample, SessionRecord } from '../engine/healthTypes'
 
 // Deterministic demo data: 3 crew x 30 mission days of squat sessions at 0 g (LEO).
-// Phase 6 stores sessions in IndexedDB and Phase 8 seeds this into it; until then
-// the CMO and Crew views read it straight from memory.
+// On first run src/db/repo.ts (seedDemoData) writes this into the IndexedDB logbook, which the
+// CMO and Crew views read from; "Reset demo data" on /cmo restores it.
 //   c1 Rivera : gradual deconditioning (depth, speed, asymmetry, adherence slip)
 //   c2 Okafor : nominal (noise only)
 //   c3 Tanaka : left/right asymmetry rising
