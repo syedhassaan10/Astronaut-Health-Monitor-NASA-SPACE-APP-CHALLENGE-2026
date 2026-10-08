@@ -1,9 +1,10 @@
 ﻿import { lazy, Suspense, useState } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import QuickStart from './components/QuickStart'
 import { useApp } from './state/AppState'
+import DownlinkSenderHost from './downlink/DownlinkSenderHost'
 import AlertLogSync from './state/AlertLogSync'
 import { useDbReady } from './state/useDbReady'
 
@@ -18,6 +19,9 @@ const Sources = lazy(() => import('./pages/Sources'))
 export default function App() {
   const a = useApp()
   const dbState = useDbReady()
+  const loc = useLocation()
+  // The Earth tab is the receiving end: it must never run the astronaut's sender.
+  const isEarthTab = loc.pathname.replace(/\/$/, '').endsWith('/downlink') && new URLSearchParams(loc.search).get('role') === 'earth'
   const [showQS, setShowQS] = useState(!a.quickStartDismissed)
   const close = () => {
     setShowQS(false)
@@ -41,6 +45,7 @@ export default function App() {
         {dbState.status === 'ready' && (
           <>
           <AlertLogSync />
+          {!isEarthTab && <DownlinkSenderHost />}
         <Suspense fallback={<p role="status" className="text-ink-500">Loading…</p>}>
         <Routes>
           <Route path="/" element={<Navigate to="/crew" replace />} />

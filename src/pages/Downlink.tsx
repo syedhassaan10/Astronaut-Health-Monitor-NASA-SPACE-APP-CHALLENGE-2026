@@ -1,19 +1,18 @@
-﻿import { useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
+import EarthView from '../components/downlink/EarthView'
+import SenderView from '../components/downlink/SenderView'
 import Page from '../components/Page'
-import { useApp } from '../state/AppState'
 
+/** /downlink is the astronaut's packet builder; /downlink?role=earth is the (simulated) Earth receiver. */
 export default function Downlink() {
   const [params] = useSearchParams()
   const earth = params.get('role') === 'earth'
-  const a = useApp()
   return (
     <Page
       title={earth ? 'Earth receiver' : 'Earth downlink'}
-      subtitle={earth ? 'Receives flight surgeon packets (simulated).' : 'Packet builder for the flight surgeon (simulated).'}
+      subtitle={earth ? 'Receives flight surgeon packets from the astronaut tab (simulated).' : 'Build a flight surgeon packet and send it to Earth when a comms window opens (simulated).'}
     >
-      <div className="panel text-sm text-ink-300">
-        Comms: <span className="font-mono">{a.comms}</span>. The packet builder and BroadcastChannel transfer arrive in Phase 7.
-      </div>
+      {earth ? <EarthView /> : <SenderView />}
     </Page>
   )
 }

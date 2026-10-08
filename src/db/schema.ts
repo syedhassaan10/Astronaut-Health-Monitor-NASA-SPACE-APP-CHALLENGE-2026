@@ -66,13 +66,25 @@ export interface AlertRow {
   acknowledged: boolean
 }
 
-/** Earth downlink queue item (Phase 7 uses this table; it exists now so the schema is stable). */
+/**
+ * A packet waiting for, in, or past the (simulated) Earth downlink. Persisted so a queued
+ * packet survives reloads. The packet itself is stored as JSON in `payload`.
+ */
 export interface QueueRow {
   id: string
   createdAt: number
+  /** queued = waiting for a comms window; sent = in transit / awaiting ACK; acked = Earth confirmed. */
   status: 'queued' | 'sent' | 'acked'
   payload: string
   sizeBytes: number
+  missionDay: number
+  /** When the current attempt started, and when the packet reaches Earth (simulated delay). */
+  sentAt: number | null
+  deliverAt: number | null
+  /** Set once the packet has actually been broadcast. */
+  transmittedAt: number | null
+  ackedAt: number | null
+  attempts: number
 }
 
 export interface NoteRow {

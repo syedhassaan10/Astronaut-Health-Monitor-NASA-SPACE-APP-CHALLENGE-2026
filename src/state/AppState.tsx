@@ -9,6 +9,8 @@ interface Persisted {
   locationId: string
   customG: number
   comms: CommsStatus
+  /** Simulated one-way Earth link delay in minutes (5-40). Demo scale: 1 minute = 1 second. */
+  latencyMin: number
   quickStartDismissed: boolean
 }
 
@@ -18,9 +20,13 @@ interface AppState extends Persisted {
   setLocationId: (id: string) => void
   setCustomG: (g: number) => void
   setComms: (c: CommsStatus) => void
+  setLatencyMin: (m: number) => void
   setQuickStartDismissed: (v: boolean) => void
   offlineReady: boolean
 }
+
+export const LATENCY_MIN = 5
+export const LATENCY_MAX = 40
 
 const KEY = 'orbitfit.app'
 const DEFAULTS: Persisted = {
@@ -28,6 +34,7 @@ const DEFAULTS: Persisted = {
   locationId: 'leo',
   customG: 0.5,
   comms: 'BLACKOUT',
+  latencyMin: 10,
   quickStartDismissed: false,
 }
 
@@ -80,6 +87,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       setLocationId: (locationId) => patch({ locationId }),
       setCustomG: (customG) => patch({ customG }),
       setComms: (comms) => patch({ comms }),
+      setLatencyMin: (m) => patch({ latencyMin: Math.min(LATENCY_MAX, Math.max(LATENCY_MIN, Math.round(m))) }),
       setQuickStartDismissed: (quickStartDismissed) => patch({ quickStartDismissed }),
     }
   }, [s, offlineReady, patch])
