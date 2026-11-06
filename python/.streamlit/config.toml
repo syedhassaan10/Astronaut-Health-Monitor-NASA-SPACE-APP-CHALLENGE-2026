@@ -1,0 +1,20 @@
+[theme]
+base = "dark"
+primaryColor = "#38bdf8"
+backgroundColor = "#060b16"
+secondaryBackgroundColor = "#111b2e"
+textColor = "#e6edf7"
+font = "sans serif"
+
+[browser]
+# Nothing leaves this computer: no usage statistics.
+gatherUsageStats = false
+
+[server]
+# Only this computer can open the app; health data is never served to the network.
+address = "localhost"
+headless = false
+maxUploadSize = 200
+
+[client]
+toolbarMode = "minimal"

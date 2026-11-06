@@ -10,6 +10,10 @@ Decision support, not a diagnosis. Built as a static web app: no backend, no acc
 
 > Prototype decision-support tool. Not a medical device. Thresholds are demonstration values, not clinically validated.
 
+> **Python version:** [`python/`](python/) is a Python and Streamlit rebuild of OrbitFit. It adds vital signs,
+> emergency guidance, a clickable body map and how-to guides for every measurement. See
+> [python/README.md](python/README.md).
+
 ## What it does
 
 In microgravity, muscles and bones decline unless crews exercise hard and regularly. On long missions the crew is far from
