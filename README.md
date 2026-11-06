@@ -1,179 +1,170 @@
 # OrbitFit
 
-**Exercise-based astronaut health self-monitoring that works offline.**
-Decision support, not a diagnosis. Built as a static web app: no backend, no accounts, no network calls at runtime.
+**Health self-monitoring for astronauts. Works fully offline.**
 
-- **Live demo:** `[PLACEHOLDER: https://your-orbitfit-url.example.com]`
-- **30-second video:** `[PLACEHOLDER: https://your-video-link.example.com]`
-- **Challenge:** NASA Space Apps Challenge 2026, *"Create Health Monitoring Software for Astronauts on Space Missions"*
-- **Team:** Syed Hassaan Areeb Kazmi (Team Owner), Azam Tariq (Developer), Eman Fatima (UI/UX Designer), Mohammad Bin Javed, Hudebia (Pakistan)
+NASA Space Apps Challenge 2026 · *Create Health Monitoring Software for Astronauts on Space Missions*
+
+Halfway to Mars, the doctors on Earth are minutes away and sometimes out of contact. Astronauts are not doctors.
+OrbitFit helps a crew measure their own health, understand what the numbers mean, act early, and handle an
+emergency step by step, with nothing but a laptop or tablet and its camera.
 
 > Prototype decision-support tool. Not a medical device. Thresholds are demonstration values, not clinically validated.
 
 ## What it does
 
-In microgravity, muscles and bones decline unless crews exercise hard and regularly. On long missions the crew is far from
-flight surgeons, with delayed messages and blackouts. OrbitFit turns the exercise astronauts already do into the measurement:
-a laptop or tablet **camera** is the only sensor, pose estimation runs **on the device**, and the app answers one question:
-*is this person deconditioning, and what should they do?*
+| Page | For | What it gives |
+|---|---|---|
+| **Today** | Astronaut | Status (● NOMINAL / ▲ WATCH / ■ ACT), today's routine and streak, then 1 · Check-in, 2 · Vitals, 3 · Workout (camera), 4 · My status |
+| **Emergency** | Any crew member | A few yes/no questions → priority and step-by-step guides (CPR, chest pain, breathing, bleeding, stroke, seizure, allergy, head injury), adapted to microgravity, Moon/Mars or Earth |
+| **Health guides** | Astronaut | A clickable body figure with each area's status, and how to measure every indicator, why it matters in space, what is normal, and what to do if it is not |
+| **Crew Medical Officer** | CMO | Crew overview with a mission-day replay, trend charts against each person's baseline, alerts, alert log, notes, CSV export/import |
+| **Downlink to Earth** | Astronaut | A 6 KB summary packet, queued until a comms window opens, with delay, blackouts, acknowledgement and retry (simulated) |
+| **Earth receiver** | Flight surgeon | The ground side: received packets, crew summaries, trends joined from several packets |
+| **About / Sources** | Judges | How it works, the measured benchmark, limitations, NASA references |
 
-| Screen | What it is |
-|---|---|
-| `/crew` | Astronaut view: live workout feedback (depth, tempo, symmetry), simulated ARED target load for the local gravity, 30-second daily check-in, own status |
-| `/cmo` | Crew Medical Officer view: status of all crew, trend charts, alert log, notes, CSV export / import |
-| `/downlink` | Build a compact flight-surgeon packet and send it when a (simulated) comms window opens |
-| `/downlink?role=earth` | The (simulated) Earth receiver, opened in a second tab |
-| `/about`, `/sources` | Problem, hazards addressed, limitations, benchmark; NASA references and credits |
+**Measurements**
 
-## Quick start (local)
+- **Camera workout:** knee angle from 3D pose points, rep counting (down, bottom, up), depth, tempo, left/right
+  difference, confidence, a form score (green / amber / red) and one plain cue ("Good depth", "Go deeper",
+  "Lower more slowly").
+- **Battery saving:** the pose model runs on about 1 frame in 7, and on every frame for 300 ms at the top and
+  bottom of each rep.
+- **Daily check-in:** sleep, fatigue, pain (with location) and stress.
+- **Vital signs:** resting heart rate, blood pressure, temperature, blood sugar and oxygen saturation. Each comes
+  with a how-to guide.
 
-**Requirements:** Chrome or Edge (current version). The camera and offline mode need `http://localhost` or `https://`; opening
-`dist/index.html` straight from disk does **not** work.
+**Health rules**
 
-**Fastest, nothing to install except Node.js** (Node 18 or newer; needs the internet once to fetch a small helper):
+- **Personal baseline:** the median of a person's first 3 valid sessions.
+- **Exercise trends:** depth decline, slower lifting, rising asymmetry, rising variability, adherence.
+- **Check-in rules:** pain, poor recovery, stress, and knee pain combined with rising asymmetry.
+- **Vital signs:** normal ranges, plus a resting heart rate rising above the person's own baseline.
+- **Every alert says** what changed, why it matters in space (with a NASA source) and what to do. All thresholds
+  are in one file: [config/health_rules.py](config/health_rules.py).
 
-- Windows: double-click **`start.bat`** (or run `.\start.bat` in a terminal)
-- Mac / Linux: run **`./start.sh`**
+**Gravity:** the exercise plan (simulated device load, tempo, weekly volume) and the emergency steps change with
+the location: Earth, ISS, deep-space transit, Moon, Mars or a custom gravity.
 
-It serves the prebuilt `dist/` folder at <http://localhost:4173> and opens your browser.
+**Logbook**
 
-**From source** (Node **22.12 or newer**: Vite 8 and Vitest 5 do not run on older versions):
+- **Crash-proof:** every rep is written to SQLite the moment it ends. An unfinished set is offered for resume.
+- **CSV:** export, and import as a merge that never overwrites. The first 28 columns are the original OrbitFit
+  web app's.
+- **Live CSV file:** a CSV file on disk can also receive every rep as it happens.
 
-```bash
-npm install     # 1. install dependencies (also copies the MediaPipe WASM into public/)
-npm start       # 2. serve the committed dist/ at http://localhost:4173
-                # 3. open http://localhost:4173 in Chrome or Edge
+**Demo data:** 3 made-up crew members × 30 days, so the app is useful on the first start.
+
+- **Rivera** is slowly getting weaker: WATCH, then ACT.
+- **Okafor** stays normal.
+- **Tanaka** has rising left/right asymmetry with knee pain.
+
+## Install and run (Windows)
+
+You need **Python 3.11 or 3.12** ([python.org](https://www.python.org/downloads/)). The first install needs
+internet once; after that everything runs offline.
+
+**Easiest:** double-click `start.bat`. It sets everything up on the first run and opens the app.
+
+**By hand**, in PowerShell inside this folder:
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+streamlit run app.py
 ```
+
+The app opens at http://localhost:8501. It only listens on this computer; no data is served to the network and
+no usage statistics are sent.
+
+> If PowerShell refuses to run `Activate.ps1`, skip it and call the venv's Python directly:
+> `.venv\Scripts\python.exe -m streamlit run app.py`.
+
+### Try it in two minutes
+
+1. **Today → 3 · Workout → ▶ Demo Mode.** A sample squat video plays; reps are counted and saved as they happen.
+2. **Sidebar → Where are you? → Moon.** The plan card changes (weight, tempo, volume).
+3. **Emergency:** answer "Chest pain? → Yes". Then try "not responding / not breathing" with the location on
+   ISS, then on the Moon: the CPR steps change.
+4. **Health guides:** with Cmdr. Rivera selected, click the knees and the heart.
+5. **Crew Medical Officer:** drag the mission-day slider back to day 8 and forward to day 30.
+6. **Downlink to Earth:** open **Earth receiver** in a second browser tab. Queue a packet, then press
+   *Open a comms window* and watch it travel and get confirmed.
+
+## Tests
+
+```powershell
+python -m pytest -q
+```
+
+286 tests cover:
+
+- **Engine:** pose math, rep detector, form scoring, frame sampler, gravity engine, all health and vitals rules,
+  emergency triage, alert log.
+- **Data:** demo data, CSV round trip, logbook, live file.
+- **Downlink:** retry, blackout and duplicates.
+- **Everything else:** the real pose model on the demo clip, every page rendering, and the wording and offline rules.
+
+## Other commands
 
 | Command | What it does |
 |---|---|
-| `npm run dev` | Development server with hot reload |
-| `npm run build` | Type-check, build to `dist/`, then verify the output (`scripts/verify-dist.mjs`) |
-| `npm start` | Serve `dist/` on port 4173 (`vite preview`) |
-| `npm test` | Unit and compliance tests (Vitest) |
-| `npm run verify` | Check that `dist/` is complete (model, WASM, `.htaccess`, base path) |
+| `python -m pose.preview` | Camera tracker in a plain window on the demo clip (`webcam` or a file path as argument) |
+| `python -m pose.benchmark` | Every-frame vs battery-saving mode on the demo clip: model calls and rep counts |
 
-### Try it in two minutes (for judges)
+## Settings
 
-A **Judge Quick Start** panel appears on first load (reopen it from the header). In short:
-
-1. **Demo Mode, no webcam needed:** open `/crew?demo=1`. A bundled squat video runs through the same on-device pipeline as the webcam.
-2. **Change gravity** in the header (Earth, ISS, Moon, Mars, custom) and watch the target load, tempo and weekly volume change.
-3. **Send a downlink:** open the Earth tab (`/downlink?role=earth`), then on `/downlink` queue a packet. In BLACKOUT it waits; open the comms window and it arrives after the simulated delay.
-4. **Turn off the internet.** It keeps working.
-
-The three demo crew members (30 days each) are generated: one deconditioning (WATCH, then ACT), one nominal, one with
-left/right asymmetry and knee pain. *CMO page, Offline logbook, Reset demo data* restores them at any time.
-
-### Test offline
-
-1. Load the app once while online and wait for the header badge to say **OFFLINE READY** (about 40 MB is cached, mostly the pose model and WASM).
-2. Open DevTools (F12), go to **Network**, set throttling to **Offline**, and reload. Everything, including Demo Mode, still works.
-3. Open the Earth tab the same way: `/downlink?role=earth` (it is just a second tab on the same device; it also works offline).
-
-## Deploy to your own hosting (Apache / cPanel)
-
-The server only delivers files; all logic runs in the browser. There is no server-side code in this repository.
-
-1. **Build:** `npm run build` (this produces `dist/` and checks it).
-2. **Upload** the **contents** of `dist/` to the web root (or a subdomain root) with the cPanel File Manager or FTP. Make sure the hidden file **`.htaccess`** is included (turn on *Show hidden files*).
-3. **Enable SSL** (cPanel: *SSL/TLS Status → Run AutoSSL*). The camera and the offline service worker only work on HTTPS. `.htaccess` redirects HTTP to HTTPS.
-
-`.htaccess` sets the `.wasm` / `.task` MIME types, falls back to `index.html` so deep links (`/cmo`, `/downlink`, `/about`) load directly,
-caches hashed assets for a year, and never caches `index.html`, `sw.js` or the manifest.
-
-**Subfolder instead of a subdomain** (for example `https://example.com/orbitfit/`): set the base path when building.
-
-```powershell
-# Windows PowerShell
-$env:VITE_BASE = "orbitfit"; npm run build
-```
-```bash
-# Mac / Linux / Git Bash
-VITE_BASE=orbitfit npm run build
-```
-
-`orbitfit`, `/orbitfit` and `/orbitfit/` all mean the same thing. (In Git Bash on Windows, do not write the leading slash: it rewrites
-`/orbitfit/` into a Windows path.) Then upload `dist/` into the `orbitfit` folder.
-
-## How it works
-
-```mermaid
-flowchart LR
-  CAM[Camera] --> POSE["Pose estimation<br/>on-device, MediaPipe"]
-  POSE --> REP["Rep metrics<br/>depth, tempo, symmetry, confidence"]
-  REP --> DB[("IndexedDB logbook<br/>every rep saved at once")]
-  CHK[Daily check-in] --> DB
-  DB --> RULES["Baselines + rules<br/>NOMINAL / WATCH / ACT"]
-  RULES --> VIEWS["Astronaut + CMO views<br/>what changed, why, what to do"]
-  VIEWS --> Q["Downlink queue<br/>saved across reloads"]
-  Q --> WIN["Comms window<br/>delay, blackout, ACK, retry (simulated)"]
-  WIN --> EARTH["Earth tab<br/>own IndexedDB, trends, import"]
-```
-
-- **Measurement.** Joint angles come from MediaPipe's 3D world landmarks, so they do not depend on which way is "up" (safe in microgravity). A rep is a top, bottom, top movement with hysteresis; each rep records depth, eccentric and concentric time, left/right asymmetry and confidence. Low-confidence reps are rejected with "Measurement unreliable — reposition camera".
-- **Adaptive sampling.** Pose inference runs on a base stride and on every frame around each rep's turning points, instead of on every frame.
-- **Decision support.** A personal baseline (median of the first 3 valid sessions) is compared with recent sessions by transparent rules for depth, lifting speed, asymmetry, variability, adherence and the daily check-in. Thresholds live in `src/config/healthRules.ts`. Each alert shows what changed, why it matters in spaceflight (with a source link) and a suggested action.
-- **Offline-first.** A service worker precaches everything, including the pose model and WASM, all served from this app's own origin. Data lives in the browser's IndexedDB, can be exported as CSV or gzipped CSV, and survives crashes (each rep is saved the moment it completes; an unfinished session is offered for resume).
-
-## Adaptive sampling benchmark
-
-30 seconds per mode on the bundled demo clip (8 Oct 2026, development machine, desktop app's built-in browser):
-
-| Mode | Frames | Pose-model calls | Avg inference | Reps counted |
-|---|---:|---:|---:|---:|
-| Full (every frame) | 371 | 371 | 40 ms | 11 |
-| Adaptive | 599 | 125 | 51 ms | 11 |
-
-**79% fewer inference calls** per frame, with the same rep count. The base stride is 7, not the 5 in the brief: with the 300 ms
-every-frame bursts at turning points, stride 5 saved 72 to 75% and stride 6 saved 74.5%, both under the 75% target. It is one
-constant in `src/engine/adaptiveSampler.ts`. Run the benchmark yourself on `/crew` (Demo Mode, then *Run 30 s benchmark*); the
-result appears on `/about`.
-
-## NASA data and sources used
-
-OrbitFit uses published NASA material for context and shaping the demonstration model. It loads no external dataset at runtime
-(the demo crew data is synthetic). Full details, with what each source is used for, are on the `/sources` page.
-
-- [Risk of Reduced Physical Performance Capabilities Due to Reduced Muscle Size, Strength, and Endurance (Muscle Risk)](https://www.nasa.gov/directorates/esdmd/hhp/risk-of-impaired-performance-due-to-reduced-muscle-size-strength-and-endurance/), NASA Human Research Program
-- [Evidence Report: Risk of Bone Fracture due to Spaceflight-induced Changes to Bone (2017)](https://ntrs.nasa.gov/citations/20170004597), NASA HRP (context only; OrbitFit does not estimate bone density)
-- [Human Research Program Advanced Exercise Concepts (AEC) Overview](https://ntrs.nasa.gov/citations/20160012339), Perusek et al., 2015 (ARED, T2 treadmill, CEVIS)
-- [Effects of Replacing Treadmill Running with Alternative Exercise Countermeasures During Long-Duration Spaceflight](https://ntrs.nasa.gov/citations/20240000929), Varanoske et al., 2024
-- [Risk of Performance Decrements and Adverse Health Outcomes Resulting from Sleep Loss, Circadian Desynchronization, and Work Overload](https://www.nasa.gov/directorates/esdmd/hhp/risk-of-performance-decrements-and-adverse-health-outcomes-resulting-from-sleep-loss-circadian-desynchronization-and-work-overload/)
-- [Risk of Adverse Cognitive or Behavioral Changes and Psychiatric Disorders (Behavioral Health Risk)](https://www.nasa.gov/directorates/esdmd/hhp/risk-of-adverse-cognitive-or-behavioral-conditions-and-psychiatric-disorders/)
-- [5 Hazards of Human Spaceflight](https://www.nasa.gov/hrp/hazards)
-
-Not NASA, with thanks: [MediaPipe Pose Landmarker](https://developers.google.com/edge/mediapipe/solutions/vision/pose_landmarker) (Google; model CC BY 4.0, code Apache 2.0) and the Demo Mode clip ["A Woman Doing Squats"](https://www.pexels.com/video/a-woman-doing-squats-6454275/) by Julia Larson on Pexels.
-
-## What OrbitFit does not claim
-
-No diagnosis. No bone density or muscle mass numbers. Kinematic estimates only. Thresholds are demonstration values, not
-clinically validated. The ARED load is simulated and the Earth link is simulated (browser tabs on one device). See `/about`
-for the full list of limitations and future work (ARED hardware integration, clinical validation, wearable sensor fusion).
-
-## Team
-
-Built for the NASA Space Apps Challenge 2026 by a team from Pakistan:
-
-| Name | Role |
+| Setting | How |
 |---|---|
-| Syed Hassaan Areeb Kazmi | Team Owner |
-| Azam Tariq | Developer |
-| Eman Fatima | UI/UX Designer |
-| Mohammad Bin Javed | |
-| Hudebia | |
+| Health thresholds | Edit [config/health_rules.py](config/health_rules.py) |
+| Logbook file | `ORBITFIT_DB` (default `var/orbitfit.db`) |
+| Pose model file | `ORBITFIT_POSE_MODEL` (default `assets/models/pose_landmarker_lite.task`, included) |
+| Simulated link and Earth inbox | `ORBITFIT_LINK_DB`, `ORBITFIT_EARTH_DB` (default in `var/`) |
+| Start again with fresh demo data | Crew Medical Officer → Logbook data → Reset demo data |
 
-**The challenge, in short:** long missions expose astronauts to radiation, isolation and confinement, altered gravity and a closed, hostile
-environment, and astronauts carry much of the responsibility for spotting changes in themselves. The task is health monitoring software that
-gathers health indicators and lets astronauts evaluate and act on their own health status. OrbitFit addresses the gravity, isolation and
-distance hazards through exercise-based, offline self-monitoring (see `/about` for what it covers and what it does not).
+## Folders
 
-## AI tool usage disclosure
+| Folder | Contents |
+|---|---|
+| `engine/` | Rep detector, form scoring, frame sampler, gravity engine, health, check-in and vitals rules, emergency triage, alert log, downlink queue |
+| `config/` | All thresholds |
+| `db/` | SQLite logbook, CSV import/export, live CSV file |
+| `pose/` | MediaPipe loader, camera tracker, overlay, session recorder, video source, benchmark, preview |
+| `downlink/` | Packet builder and checks, queue/link/Earth stores, sender, Earth receiver |
+| `guidance/` | Measurement guides, body map, daily routine, sources |
+| `pages/`, `ui/` | Streamlit pages and shared widgets |
+| `data/` | Crew, locations, demo data, CSV format |
+| `assets/` | Pose model and demo clip (bundled, so nothing is downloaded at run time) |
+| `tests/` | pytest tests |
 
-This project was built with the assistance of **Claude Code** (Anthropic). Claude Code wrote and tested most of the code and
-documentation under the direction of the project team, who set the requirements and are responsible for the result. Third-party
-models and libraries are credited above and in `package.json`.
+## How NASA resources are used
 
-## License
+The health indicators, the "why it matters in space" text on every alert and guide, and the exercise model are
+based on NASA Human Research Program risk pages. These include muscle, bone, cardiovascular, immune, food and
+nutrition, hypoxia, CO2, sleep, behavioural health and in-flight medical conditions. They also draw on NASA
+technical reports on ISS exercise countermeasures. Each alert and guide links to its source. NASA's Open Science
+Data Repository (OSDR) is named in the challenge as a source of real spaceflight biology data. OrbitFit does not
+load an OSDR dataset at run time; its demo crew data is synthetic and generated on the device. Full list:
+[guidance/sources.py](guidance/sources.py) and the Sources page.
 
-[MIT](LICENSE)
+## Limitations
+
+- Prototype, not a medical device. Thresholds are demonstration values.
+- Camera estimates depend on placement, light and clothing. The camera measures squat and deadlift; heel raise
+  has a plan but is not measured.
+- On the 24 fps demo clip, battery saving cuts model calls by 72-76% with the same rep count (80% at 30 fps).
+- Vital signs are typed in; OrbitFit does not connect to medical devices.
+- The exercise device load, the Earth link and the demo crew are simulated.
+- The emergency guides follow common first-aid steps and never replace the onboard medical procedures, the Crew
+  Medical Officer or the flight surgeon.
+
+## Credits
+
+- **Pose model:** MediaPipe Pose Landmarker (lite) by Google, CC BY 4.0.
+- **Demo clip:** "A Woman Doing Squats" by Julia Larson, via Pexels (Pexels License).
+- **CPR steps:** follow the 2025 American Heart Association guidelines.
+
+## Team and licence
+
+Syed Hassaan Areeb Kazmi (Team Owner), Azam Tariq (Developer), Eman Fatima (UI/UX Designer),
+Mohammad Bin Javed, Hudebia. MIT License, see [LICENSE](LICENSE).

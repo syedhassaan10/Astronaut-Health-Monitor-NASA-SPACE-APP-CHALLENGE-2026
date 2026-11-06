@@ -1,54 +1,28 @@
 @echo off
-rem OrbitFit local backup launcher (Windows).
-rem Needs only Node.js. It serves the prebuilt dist folder at http://localhost:4173 and opens your browser.
-rem (The camera and offline mode need http://localhost or https; opening dist\index.html as a file does not work.)
-rem
-rem   Double-click start.bat, or in a terminal run:  .\start.bat
-rem   set NO_BROWSER=1        ...before running, to start without opening a browser
+rem OrbitFit launcher for Windows. Double-click to start.
+rem The first start creates a Python environment in .venv and installs the packages (needs internet once).
+rem After that, OrbitFit runs fully offline.
 
-setlocal
 cd /d "%~dp0"
-set PORT=4173
-set URL=http://localhost:%PORT%
 
-where node >nul 2>nul
-if errorlevel 1 (
-  echo Node.js is required but was not found. Install it from https://nodejs.org and try again.
-  pause
-  exit /b 1
-)
-if not exist "dist\index.html" (
-  echo The dist folder is missing. Build it first:  npm install ^&^& npm run build
-  pause
-  exit /b 1
-)
-
-rem The "serve" helper is fetched from npm on first use (about 10-20 seconds, internet needed once).
-rem Check that we can get it BEFORE starting, so Ctrl+C later simply stops the server.
-echo Preparing the local server (first run downloads a small helper)...
-call npx --yes serve --version >nul 2>nul
-if errorlevel 1 goto noserve
-
-echo OrbitFit is starting at %URL%
-echo Open it in Chrome or Edge. Press Ctrl+C to stop.
-
-if not defined NO_BROWSER (
-  start "" cmd /c "timeout /t 2 /nobreak >nul & start %URL%"
+if not exist ".venv\Scripts\python.exe" (
+    echo Setting up OrbitFit for the first time. This takes a few minutes...
+    py -3 -m venv .venv 2>nul
+    if not exist ".venv\Scripts\python.exe" python -m venv .venv
+    if not exist ".venv\Scripts\python.exe" (
+        echo Could not create a Python environment. Install Python 3.11 or 3.12 from python.org and try again.
+        pause
+        exit /b 1
+    )
+    ".venv\Scripts\python.exe" -m pip install --upgrade pip
+    ".venv\Scripts\python.exe" -m pip install -r requirements.txt
+    if errorlevel 1 (
+        echo Installing the packages failed. Check the internet connection and try again.
+        pause
+        exit /b 1
+    )
 )
 
-rem -s = single-page-app mode (deep links like /cmo work), -n = do not touch the clipboard.
-call npx --yes serve dist -l %PORT% -s -n
+echo Starting OrbitFit at http://localhost:8501 (close this window to stop it)
+".venv\Scripts\python.exe" -m streamlit run app.py
 pause
-exit /b %ERRORLEVEL%
-
-:noserve
-echo Could not get the serve helper (are you offline?).
-if exist "node_modules\.bin\vite.cmd" (
-  echo Using the project's own server instead: npm start
-  call npm start
-  pause
-  exit /b %ERRORLEVEL%
-)
-echo Connect to the internet once and run this again, or run:  npm install ^&^& npm start
-pause
-exit /b 1
