@@ -6,18 +6,16 @@ import streamlit as st
 from data.crew import CREW, crew_by_id
 from db import repo
 from db.logbook_io import export_logbook_csv, import_logbook_csv
-from engine.checkin_rules import LOCATION_LABEL
 from engine.health_types import SeriesPoint
 from engine.session_metrics import summarize_session
-from ui import state, widgets
+from ui import state, theme, widgets
 
 state.page_start()
 
 conn = state.get_conn()
 ctx = state.context()
 
-st.title("🩺 Crew Medical Officer")
-st.write("Who needs attention today, and why. Trend estimates for decision support, not a diagnosis.")
+theme.page_header("Crew Medical Officer view", "Status of all crew, trend estimates and alerts. Decision support only, not a diagnosis.")
 
 day = st.slider("Mission day (drag back to replay how each crew member's trend developed)", 1, ctx.day, ctx.day,
                 help="Demo feature: the assessments below use only data up to this day.")
@@ -41,32 +39,20 @@ with tab_overview:
     for col, member in zip(cols, CREW):
         a = assessments[member.id]
         with col.container(border=True):
-            st.markdown(f"**{member.name}**  \n{member.role}")
-            widgets.show_status(a.status, "1.2rem")
+            theme.html_block(
+                f'<div class="of-row"><div><div class="of-title">{theme.esc(member.name)}</div>'
+                f'<div class="of-muted">{theme.esc(member.role)}</div></div>'
+                f'<span class="of-right">{theme.badge(a.status, True)}</span></div>')
             if a.alerts:
-                for alert in a.alerts:
-                    st.markdown(f"{widgets.status_html(alert.level, '0.85rem')} {alert.title}", unsafe_allow_html=True)
+                lines = "".join(
+                    f'<div style="margin-top:0.25rem"><span style="color:{theme.STATUS_STYLE[al.level][1]};'
+                    f'font-weight:700">{al.level}</span> · {theme.esc(al.title)}</div>' for al in a.alerts)
+                theme.html_block(f'<div style="margin-top:0.5rem">{len(a.alerts)} active alerts:{lines}</div>')
             else:
-                st.caption("No alerts.")
-            c = latest(data.checkins, member.id)
-            if c:
-                where = f" ({LOCATION_LABEL[c.pain_location]})" if c.pain_location else ""
-                st.caption(f"Check-in day {c.day}: sleep {c.sleep} · fatigue {c.fatigue} · pain {c.pain}{where} · "
-                           f"stress {c.stress}")
-            v = latest(data.vitals, member.id)
-            if v:
-                parts = []
-                if v.heart_rate is not None:
-                    parts.append(f"HR {v.heart_rate:g}")
-                if v.systolic is not None and v.diastolic is not None:
-                    parts.append(f"BP {v.systolic:g}/{v.diastolic:g}")
-                if v.temperature_c is not None:
-                    parts.append(f"{v.temperature_c:g} °C")
-                if v.spo2_pct is not None:
-                    parts.append(f"SpO2 {v.spo2_pct:g}%")
-                if v.glucose_mg_dl is not None:
-                    parts.append(f"glucose {v.glucose_mg_dl:g}")
-                st.caption(f"Vitals day {v.day}: " + " · ".join(parts))
+                theme.html_block('<div style="margin-top:0.5rem">No active alerts.</div>')
+            theme.html_block(f'<div style="border-top:1px solid {theme.STROKE};margin-top:0.7rem;padding-top:0.6rem">'
+                             f'{widgets.checkin_chips(latest(data.checkins, member.id))}</div>'
+                             f'<div>{widgets.vitals_chips(latest(data.vitals, member.id))}</div>')
 
 # ---- trends ----------------------------------------------------------------------------------
 

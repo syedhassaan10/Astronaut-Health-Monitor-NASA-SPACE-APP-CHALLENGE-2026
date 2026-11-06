@@ -34,13 +34,13 @@ def run_page(page):
 def test_page_renders_without_errors(page):
     at = run_page(page)
     assert not at.exception, [e.value for e in at.exception]
-    footer = " ".join(c.value for c in at.caption)
-    assert "Not a medical device" in footer
+    text = " ".join(m.value for m in at.markdown) + " ".join(c.value for c in at.caption)
+    assert "Not a medical device" in text
 
 
 def test_today_shows_status_routine_and_tabs():
     at = run_page("pages/today.py")
-    assert "Today" in at.title[0].value
+    assert "Astronaut view" in at.title[0].value
     labels = [m.label for m in at.metric]
     assert "1 · Check-in" in labels and "Routine streak" in labels
     assert len(at.tabs) == 4
@@ -50,7 +50,7 @@ def test_saving_a_check_in_updates_the_routine():
     at = run_page("pages/today.py")
     at.slider[2].set_value(5)                 # pain 5
     at.selectbox[2].set_value("knee")         # where (sidebar has 2 selectboxes first)
-    at.button[0].click()                      # Save check-in (first form button)
+    at.button(key="save_checkin").click()
     at.run()
     assert not at.exception
     assert any("Check-in saved" in s.value for s in at.success)
@@ -74,7 +74,7 @@ def test_emergency_cpr_steps_follow_the_sidebar_location():
     at.run()
     steps = " ".join(c.label for c in at.checkbox)
     assert "restraint" in steps  # default location is the ISS (microgravity)
-    at.selectbox(key="location_id").set_value("moon")
+    at.selectbox(key="_location_id").set_value("moon")
     at.run()
     steps = " ".join(c.label for c in at.checkbox)
     assert "floor" in steps
@@ -93,9 +93,22 @@ def test_cmo_replay_slider_changes_the_status():
 
 def test_queueing_a_packet_shows_it_waiting_for_a_link():
     at = run_page("pages/downlink.py")
-    at.button[1].click()  # sidebar has no buttons; [0] opens/closes the link, [1] queues a packet
+    [queue] = [b for b in at.button if b.label == "Queue packet for Earth"]
+    queue.click()
     at.run()
     assert not at.exception
     assert any("Queued pkt-d30-" in s.value for s in at.success)
     text = " ".join(m.value for m in at.markdown)
     assert "Waiting for link" in text
+
+
+def test_the_chosen_location_and_crew_member_survive_a_page_change():
+    at = run_page("pages/today.py")
+    at.selectbox(key="_location_id").set_value("moon")
+    at.selectbox(key="_crew_id").set_value("c3")
+    at.run()
+    at.switch_page("pages/emergency.py")
+    at.run()
+    assert at.selectbox(key="_location_id").value == "moon"
+    assert at.selectbox(key="_crew_id").value == "c3"
+    assert "Moon" in " ".join(c.value for c in at.caption)

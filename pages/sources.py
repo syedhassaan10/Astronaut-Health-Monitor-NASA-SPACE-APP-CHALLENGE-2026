@@ -2,13 +2,13 @@
 
 import streamlit as st
 
-from ui import state
+from ui import state, theme
 
 from guidance.sources import CREDITS, NASA_SOURCES, OTHER_SOURCES
 
 state.page_start()
 
-st.title("📚 Sources")
+theme.page_header("Sources", "NASA references, other references and credits. Every link was checked.")
 
 st.subheader("How OrbitFit uses NASA resources")
 st.write(

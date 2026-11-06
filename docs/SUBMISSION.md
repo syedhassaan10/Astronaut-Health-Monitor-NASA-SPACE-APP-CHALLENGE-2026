@@ -66,7 +66,7 @@ offline health self-monitoring app that turns a laptop or tablet into a crew hea
 **Benefits:** it works with no internet, no wearables and no ground contact. It is plain language for
 non-doctors, never claims a diagnosis, and every simulated part is labelled as simulated.
 
-**Tools:** Python, Streamlit, MediaPipe, OpenCV, SQLite, pandas, Plotly, pytest (286 tests).
+**Tools:** Python, Streamlit, MediaPipe, OpenCV, SQLite, pandas, Plotly, pytest (287 tests).
 
 **Impact beyond space:** the same tool could support people in remote communities or places with little access
 to health services.

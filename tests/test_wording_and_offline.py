@@ -54,7 +54,7 @@ def test_usage_statistics_are_off():
 
 def test_simulated_things_say_so():
     widgets = (ROOT / "ui" / "widgets.py").read_text(encoding="utf-8")
-    assert "Suggested weight (simulated)" in widgets
+    assert "Simulated ARED target load" in widgets
     about = (ROOT / "pages" / "about.py").read_text(encoding="utf-8")
     assert "demo crew data is synthetic" in about.lower()
     assert "earth link is simulated" in about.lower()

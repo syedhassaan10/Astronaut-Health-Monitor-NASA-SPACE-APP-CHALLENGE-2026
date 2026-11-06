@@ -83,7 +83,7 @@ no usage statistics are sent.
 ### Try it in two minutes
 
 1. **Today → 3 · Workout → ▶ Demo Mode.** A sample squat video plays; reps are counted and saved as they happen.
-2. **Sidebar → Where are you? → Moon.** The plan card changes (weight, tempo, volume).
+2. **Location (top of the page) → Moon.** The plan card on the Workout tab changes (weight, tempo, volume).
 3. **Emergency:** answer "Chest pain? → Yes". Then try "not responding / not breathing" with the location on
    ISS, then on the Moon: the CPR steps change.
 4. **Health guides:** with Cmdr. Rivera selected, click the knees and the heart.
@@ -97,7 +97,7 @@ no usage statistics are sent.
 python -m pytest -q
 ```
 
-286 tests cover:
+287 tests cover:
 
 - **Engine:** pose math, rep detector, form scoring, frame sampler, gravity engine, all health and vitals rules,
   emergency triage, alert log.

@@ -7,12 +7,12 @@ from engine.health_types import ACT, NOMINAL, WATCH
 from guidance.body_map import REGIONS, alerts_for_region, latest_pain_location, region_by_id, region_status
 from guidance.measurements import guide_by_id, measurement_guides
 from guidance.sources import source_by_id
-from ui import state, widgets
+from ui import state, theme, widgets
 
 state.page_start()
 
 SYMBOL = {NOMINAL: "circle", WATCH: "triangle-up", ACT: "square"}
-OUTLINE = "#7a8aa8"
+OUTLINE = theme.MUTED
 # Where each label sits in the right-hand label column (spread out so none overlap).
 LABEL_X = 9.6
 LABEL_Y = {"brain": 19.0, "shoulders": 17.2, "lungs": 15.8, "heart": 14.4, "immune": 13.0, "back": 11.6,
@@ -58,14 +58,14 @@ def body_figure(statuses):
         fig.add_trace(go.Scatter(
             x=[LABEL_X for _ in regions], y=[LABEL_Y[r.id] for r in regions], mode="markers+text",
             marker=dict(size=12, color=colour, symbol=SYMBOL[status]),
-            text=[r.label for r in regions], textposition="middle right", textfont=dict(color="#e6edf7", size=13),
+            text=[r.label for r in regions], textposition="middle right", textfont=dict(color=theme.TEXT, size=13),
             customdata=[r.id for r in regions], showlegend=False, hovertemplate="%{text}<extra></extra>",
         ))
     fig.update_layout(height=640, margin=dict(l=0, r=0, t=10, b=0), paper_bgcolor="rgba(0,0,0,0)",
                       plot_bgcolor="rgba(0,0,0,0)", clickmode="event+select",
                       xaxis=dict(visible=False, range=[0, 20], fixedrange=True),
                       yaxis=dict(visible=False, range=[0, 20.5], fixedrange=True, scaleanchor="x"),
-                      legend=dict(orientation="h", y=-0.02, font=dict(color="#e6edf7")))
+                      legend=dict(orientation="h", y=-0.02, font=dict(color=theme.TEXT)))
     return fig
 
 
@@ -104,7 +104,7 @@ def show_guide(guide, environment):
         st.caption(f"Source: [{src.title}]({src.url})")
 
 
-st.title("📖 Health guides")
+theme.page_header("Health guides", "Your body, what spaceflight does to it, and how to measure it.")
 st.write(f"Tap a body area to see what it does, what spaceflight does to it, {ctx.crew.name}'s current status "
          "there, and how to measure it. You do not need to be a doctor: every step is written out.")
 
@@ -131,7 +131,7 @@ with info_col:
     st.markdown(f"**In space:** {region.in_space}")
     region_alerts = alerts_for_region(region, assessment.alerts, pain_location)
     for i, alert in enumerate(region_alerts):
-        widgets.alert_card(alert, key=f"region-{i}")
+        widgets.alert_card(alert, key=f"region-{i}", compact=True)
     if not region_alerts:
         st.success("No alerts for this area right now.")
     for guide_id in region.measures:

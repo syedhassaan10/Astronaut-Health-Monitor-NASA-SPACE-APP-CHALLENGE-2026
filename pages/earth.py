@@ -7,7 +7,7 @@ from downlink.packet import adherence_pct, merge_trends
 from downlink.receiver import EarthReceiver
 from engine.checkin_rules import LOCATION_LABEL
 from engine.health_types import SeriesPoint
-from ui import state, widgets
+from ui import state, theme, widgets
 
 state.page_start()
 
@@ -21,7 +21,7 @@ if "receiver" not in st.session_state:
     st.session_state.receiver = EarthReceiver(earth, link)
 receiver = st.session_state.receiver
 
-st.title("🌍 Earth receiver · flight surgeon")
+theme.page_header("Earth receiver", "The flight surgeon on the ground. Simulated.")
 st.caption("SIMULATED ground station. It keeps its own inbox and never reads the spacecraft logbook. "
            "Keep this page open while packets are being sent; a packet sent while nobody listens is lost and re-sent.")
 

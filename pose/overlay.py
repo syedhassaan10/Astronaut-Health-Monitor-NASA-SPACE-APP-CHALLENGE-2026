@@ -14,11 +14,11 @@ BONES = [
 ]
 LEG_POINTS = [23, 24, 25, 26, 27, 28]
 
-# BGR colours (OpenCV order), matching the app: green / amber / red, sky blue when neutral.
+# BGR colours (OpenCV order), matching the app: green / amber / rose, sky blue when neutral.
 COLOURS = {
     "green": (153, 211, 52),
     "amber": (36, 191, 251),
-    "red": (113, 113, 248),
+    "red": (133, 113, 251),
     "neutral": (248, 189, 56),
 }
 

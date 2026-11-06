@@ -12,7 +12,7 @@ from downlink import stores
 from downlink.packet import build_packet, format_kb, packet_size_bytes
 from downlink.sender import DownlinkSender
 from engine.downlink_queue import phase_of
-from ui import state
+from ui import state, theme
 
 state.page_start()
 
@@ -36,7 +36,7 @@ if "sender" not in st.session_state:
     st.session_state.sender = DownlinkSender(conn, link)
 sender = st.session_state.sender
 
-st.title("📡 Downlink to Earth")
+theme.page_header("Downlink to Earth", "Send a short summary to the flight surgeon when a comms window opens.")
 st.write("Send a short summary to the flight surgeon on Earth. On a deep-space mission messages take minutes to "
          "arrive and the link is often down, so the packet waits in a queue, survives a restart, and is sent again "
          "until Earth confirms it.")
@@ -50,14 +50,12 @@ latency_min = stores.get_setting(conn, "latency_min", 10)
 c1, c2 = st.columns([1, 2])
 with c1:
     if window_open:
-        st.markdown('<div style="font-size:1.4rem;font-weight:800;color:#34d399">● LINK OPEN</div>',
-                    unsafe_allow_html=True)
+        st.markdown(theme.pill("LINK OPEN", theme.GOOD), unsafe_allow_html=True)
         if st.button("Close the link (start a blackout)"):
             stores.set_setting(conn, "window_open", False)
             st.rerun()
     else:
-        st.markdown('<div style="font-size:1.4rem;font-weight:800;color:#f87171">■ BLACKOUT · no link</div>',
-                    unsafe_allow_html=True)
+        st.markdown(theme.pill("BLACKOUT · no link", theme.BAD), unsafe_allow_html=True)
         if st.button("Open a comms window", type="primary"):
             stores.set_setting(conn, "window_open", True)
             st.rerun()
@@ -96,11 +94,11 @@ def step_bar(current):
     parts = []
     for i, name in enumerate(STEPS):
         if i < current:
-            colour, mark = "#34d399", "✓"
+            colour, mark = theme.GOOD, "✓"
         elif i == current:
-            colour, mark = "#38bdf8", "●"
+            colour, mark = theme.CYAN, "●"
         else:
-            colour, mark = "#7a8aa8", "○"
+            colour, mark = theme.FAINT, "○"
         parts.append(f'<span style="color:{colour};font-weight:600">{mark} {name}</span>')
     return " &nbsp;→&nbsp; ".join(parts)
 

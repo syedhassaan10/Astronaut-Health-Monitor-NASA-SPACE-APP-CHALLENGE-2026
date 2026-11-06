@@ -9,14 +9,14 @@ from db import repo
 from engine.emergency import (
     DISCLAIMER, EMERGENCY, MONITOR, PROTOCOLS, URGENT, EmergencyAnswers, steps_for, triage,
 )
-from ui import state
+from ui import state, theme
 
 state.page_start()
 
 PRIORITY_STYLE = {
-    EMERGENCY: ("■", "#f87171", "EMERGENCY: act now and alert the whole crew"),
-    URGENT: ("▲", "#fbbf24", "URGENT: get the Crew Medical Officer soon"),
-    MONITOR: ("●", "#34d399", "No red flags found: measure and keep watching"),
+    EMERGENCY: ("■", theme.BAD, "EMERGENCY: act now and alert the whole crew"),
+    URGENT: ("▲", theme.WARN, "URGENT: get the Crew Medical Officer soon"),
+    MONITOR: ("●", theme.GOOD, "No red flags found: measure and keep watching"),
 }
 ENVIRONMENT_WORDS = {
     "microgravity": "microgravity (nothing stays put)",
@@ -27,12 +27,12 @@ ENVIRONMENT_WORDS = {
 conn = state.get_conn()
 ctx = state.context()
 
-st.title("🚨 Emergency")
+theme.page_header("Emergency", "Someone is unwell. Stay calm: this guide walks you through it.")
 st.markdown("**First: call out to your crew and the Crew Medical Officer.** Then answer below. "
             "The guide updates as you answer.")
 st.caption(DISCLAIMER)
 st.caption(f"Steps are adapted to {ENVIRONMENT_WORDS[ctx.environment]} ({ctx.location.label}). "
-           "Change the location in the sidebar if that is wrong.")
+           "Change the location at the top of the page if that is wrong.")
 
 patient_id = st.selectbox("Who needs help?", [c.id for c in CREW],
                           index=[c.id for c in CREW].index(ctx.crew.id),
@@ -45,21 +45,21 @@ def yes_no(question, default_yes, key, help_text=None):
     return answer == "Yes"
 
 
-left, right = st.columns(2)
-with left:
-    st.subheader("1 · Check the person")
-    responsive = yes_no("Do they answer when you speak loudly and tap their shoulders?", True, "q_responsive")
-    breathing = yes_no("Are they breathing normally (not gasping)?", True, "q_breathing",
-                       "Look at the chest and listen for up to 10 seconds.")
-    chest_pain = yes_no("Chest pain, pressure or tightness?", False, "q_chest")
-    breathing_difficulty = yes_no("Difficulty breathing?", False, "q_breath_diff")
-    severe_bleeding = yes_no("Severe bleeding?", False, "q_bleeding")
-with right:
-    st.subheader("&nbsp;")
-    stroke_signs = yes_no("Face drooping, arm weakness or slurred speech?", False, "q_stroke")
-    seizure = yes_no("Seizure (uncontrolled shaking)?", False, "q_seizure")
-    allergic = yes_no("Swelling of face or throat, or a widespread rash after a trigger?", False, "q_allergy")
-    head_injury = yes_no("Hit their head?", False, "q_head")
+with st.container(border=True):
+    theme.html_block(theme.label("1 · Check the person"))
+    left, right = st.columns(2)
+    with left:
+        responsive = yes_no("Do they answer when you speak loudly and tap their shoulders?", True, "q_responsive")
+        breathing = yes_no("Are they breathing normally (not gasping)?", True, "q_breathing",
+                           "Look at the chest and listen for up to 10 seconds.")
+        chest_pain = yes_no("Chest pain, pressure or tightness?", False, "q_chest")
+        breathing_difficulty = yes_no("Difficulty breathing?", False, "q_breath_diff")
+        severe_bleeding = yes_no("Severe bleeding?", False, "q_bleeding")
+    with right:
+        stroke_signs = yes_no("Face drooping, arm weakness or slurred speech?", False, "q_stroke")
+        seizure = yes_no("Seizure (uncontrolled shaking)?", False, "q_seizure")
+        allergic = yes_no("Swelling of face or throat, or a widespread rash after a trigger?", False, "q_allergy")
+        head_injury = yes_no("Hit their head?", False, "q_head")
 
 with st.expander("2 · Measurements, if you have them (leave empty if not)"):
     m1, m2, m3, m4 = st.columns(4)
@@ -77,9 +77,10 @@ answers = EmergencyAnswers(
 result = triage(answers)
 
 shape, colour, words = PRIORITY_STYLE[result.priority]
-st.markdown(f'<div style="border:3px solid {colour};border-radius:10px;padding:14px 18px;margin:12px 0">'
+st.markdown(f'<div style="border:2px solid {theme.tint(colour, 0.6)};background:{theme.tint(colour, 0.12)};'
+            f'border-radius:22px;padding:16px 22px;margin:12px 0;box-shadow:0 0 30px {theme.tint(colour, 0.25)}">'
             f'<div style="color:{colour};font-size:1.8rem;font-weight:800">{shape} {words}</div>'
-            f'<div style="color:#e6edf7;margin-top:6px">{"<br>".join(result.reasons)}</div></div>',
+            f'<div style="color:{theme.TEXT};margin-top:6px">{"<br>".join(result.reasons)}</div></div>',
             unsafe_allow_html=True)
 
 st.subheader("3 · What to do")

@@ -2,14 +2,14 @@
 
 import streamlit as st
 
-from ui import state
+from ui import state, theme
 
 from config.health_rules import HEALTH_RULES
 from engine.adaptive_sampler import DEFAULT_SAMPLER
 
 state.page_start()
 
-st.title("ℹ️ About OrbitFit")
+theme.page_header("About OrbitFit", "What it does, how it works, what it does not claim, and who built it.")
 
 st.subheader("The problem")
 st.write(
@@ -29,7 +29,7 @@ st.markdown(
     "● NOMINAL, ▲ WATCH or ■ ACT, always with what changed, why it matters in space, and what to do.\n"
     "- **Guides emergencies**: a few yes/no questions give a priority and step-by-step guides (CPR, chest pain, "
     "breathing, bleeding, stroke, seizure, allergy, head injury), adapted to microgravity, Moon/Mars or Earth.\n"
-    "- **Reminds**: the sidebar shows what is still to do today; a streak counts days with the full routine done.\n"
+    "- **Reminds**: the header shows what is still to do today; a streak counts days with the full routine done.\n"
     "- **Adapts to the place**: the exercise plan and the emergency steps change with gravity (Earth, ISS, transit, "
     "Moon, Mars, custom).\n"
     "- **Works offline**: everything runs on the computer; the logbook is a local SQLite file."
