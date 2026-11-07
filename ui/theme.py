@@ -80,7 +80,23 @@ header[data-testid="stHeader"] a, header[data-testid="stHeader"] span {{
   font-size: 1.05rem; color: {TEXT}; font-weight: 600;
 }}
 img[data-testid="stHeaderLogo"] {{ width: auto !important; height: 36px !important; max-width: none !important; }}
-[data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"] {{ display: none; }}
+/* On phones and tablets Streamlit folds the top menu into this side panel (opened with the » button). */
+[data-testid="stSidebar"] {{
+  background: rgba(255, 255, 255, 0.97) !important; border-right: 1px solid {STROKE};
+  box-shadow: 8px 0 30px rgba(15, 23, 42, 0.12);
+}}
+[data-testid="stSidebarNavLink"] {{ border-radius: 12px; padding: 0.55rem 0.8rem; min-height: 2.8rem; }}
+[data-testid="stSidebarNavLink"] span {{ font-size: 1.1rem !important; font-weight: 700; color: {TEXT}; }}
+[data-testid="stSidebarNavLink"][aria-current="page"] {{ background: {GRADIENT}; }}
+[data-testid="stSidebarNavLink"][aria-current="page"] span {{ color: #ffffff !important; }}
+header[data-testid="stHeader"] button {{ color: {TEXT}; }}
+header[data-testid="stHeader"] button svg {{ width: 1.6rem; height: 1.6rem; }}
+/* Say "Menu" next to the » button, so everyone knows where the pages are on a phone. */
+[data-testid="stExpandSidebarButton"] {{
+  border: 1px solid {SPACE_600} !important; border-radius: 999px !important; padding: 0.3rem 0.9rem !important;
+  background: #ffffff !important; gap: 0.3rem;
+}}
+[data-testid="stExpandSidebarButton"]::after {{ content: "Menu"; font-size: 1.05rem; font-weight: 700; color: {TEXT}; }}
 
 /* ---- white glass cards ---------------------------------------------------------------- */
 [data-testid="stLayoutWrapper"] > [data-testid="stVerticalBlock"],

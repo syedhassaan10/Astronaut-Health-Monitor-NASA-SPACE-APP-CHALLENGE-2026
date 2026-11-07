@@ -71,3 +71,12 @@ def test_no_bone_density_or_muscle_mass_numbers_are_claimed():
 def test_app_is_only_reachable_from_this_computer():
     config = (ROOT / ".streamlit" / "config.toml").read_text(encoding="utf-8")
     assert 'address = "localhost"' in config
+
+
+def test_the_menu_is_never_hidden_on_phones_and_tablets():
+    # On narrow screens Streamlit moves the top menu into the side panel; hiding it hides the menu.
+    from ui.theme import CSS
+    compact = CSS.replace(" ", "")
+    assert '[data-testid="stSidebar"]{{display:none' not in compact
+    assert '[data-testid="stSidebar"],[data-testid="stSidebarCollapsedControl"]{display:none' not in compact
+    assert 'content: "Menu"' in CSS
