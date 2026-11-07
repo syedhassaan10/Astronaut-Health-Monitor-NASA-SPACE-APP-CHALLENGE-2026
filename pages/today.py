@@ -37,7 +37,7 @@ def latest_for(items):
 
 # ---- header ----------------------------------------------------------------------------------
 
-theme.page_header("Astronaut view", "Workout + daily self-check.")
+theme.page_header("Astronaut view", "Three steps a day: check-in, vitals, workout.")
 
 flash = st.session_state.pop("flash", None)
 if flash:
@@ -63,7 +63,7 @@ c3.metric("3 · Workout", "Done ✓" if routine.workout else "To do")
 c4.metric("Routine streak", f"{days_in_a_row} days", help="Days in a row with check-in, vitals and workout all done.")
 
 tab_checkin, tab_vitals, tab_workout, tab_status = st.tabs(
-    ["1 · Daily check-in", "2 · Vitals", "3 · Workout", "4 · My trend status"])
+    ["1 · Check-in", "2 · Vitals", "3 · Workout", "4 · My status"])
 
 # ---- 1. check-in -----------------------------------------------------------------------------
 
@@ -87,9 +87,7 @@ with tab_checkin:
             f'<div class="of-row"><span class="of-title">Daily check-in</span>'
             f'<span class="of-muted">· about 30 seconds</span>'
             f'<span class="of-right of-label">{theme.esc(crew.name)} · mission day {ctx.day}</span></div>'
-            f'<div style="margin:0.3rem 0 0.6rem 0">How are you today? Your answers sit next to your exercise trends '
-            f'so the Crew Medical Officer sees the whole picture. '
-            f'This is self-reported decision support, not a diagnosis.</div>')
+            f'<div class="of-big" style="margin:0.3rem 0 0.6rem 0">How are you today?</div>')
         with st.form(f"checkin-{crew.id}", border=False):
             col_a, col_b = st.columns(2, gap="large")
             sleep = slider_with_ends(col_a, "Sleep quality", "very poor", "excellent", existing.sleep if existing else 7)
@@ -137,8 +135,7 @@ with tab_vitals:
         theme.html_block(
             '<div class="of-row"><span class="of-title">Vital signs</span>'
             '<span class="of-right of-label">demonstration ranges · resting adult</span></div>'
-            f'<div style="margin:0.3rem 0 0.6rem 0">Measure what you can and leave the rest empty. Each measurement '
-            f'has a short how-to guide below.</div>')
+            '<div class="of-big" style="margin:0.3rem 0 0.6rem 0">Measure what you can. Leave the rest empty.</div>')
         with st.form(f"vitals-{crew.id}", border=False):
             cols = st.columns(3)
             values = {}
@@ -276,10 +273,9 @@ with tab_workout:
         stats_slot = perf_col.empty()
         table_slot = reps_col.empty()
         if camera is None:
-            video_slot.info("Press Start webcam or Demo Mode. The camera only turns on when you press a button, "
-                            "and no video leaves this computer.")
+            video_slot.info("Press Start webcam or Demo Mode. Video never leaves this computer.")
 
-    with st.expander("Live CSV file: also save every rep to a file on disk"):
+    with st.expander("Also save reps to a CSV file"):
         default_path = str(PROJECT_DIR / "var" / "live-logbook.csv")
         path = st.text_input("File (same columns as Export CSV, so it can be imported back)",
                              value=str(live_file.path) if live_file.path else default_path)

@@ -48,7 +48,7 @@ def body_figure(statuses):
         if not regions:
             continue
         _, colour, words = widgets.STATUS[status]
-        marker = dict(size=26, color=colour, symbol=SYMBOL[status], line=dict(color="#060b16", width=2))
+        marker = dict(size=26, color=colour, symbol=SYMBOL[status], line=dict(color="#ffffff", width=2))
         fig.add_trace(go.Scatter(
             x=[r.x for r in regions], y=[r.y for r in regions], mode="markers", marker=marker,
             customdata=[r.id for r in regions], text=[r.label for r in regions], name=f"{status} · {words}",
@@ -104,9 +104,7 @@ def show_guide(guide, environment):
         st.caption(f"Source: [{src.title}]({src.url})")
 
 
-theme.page_header("Health guides", "Your body, what spaceflight does to it, and how to measure it.")
-st.write(f"Tap a body area to see what it does, what spaceflight does to it, {ctx.crew.name}'s current status "
-         "there, and how to measure it. You do not need to be a doctor: every step is written out.")
+theme.page_header("Health guides", "Tap a body area. Every step is written out: you do not need to be a doctor.")
 
 statuses = {r.id: region_status(r, assessment.alerts, pain_location) for r in REGIONS}
 if "region" not in st.session_state:

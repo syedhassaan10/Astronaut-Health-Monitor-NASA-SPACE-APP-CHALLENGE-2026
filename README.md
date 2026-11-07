@@ -166,5 +166,4 @@ load an OSDR dataset at run time; its demo crew data is synthetic and generated 
 
 ## Team and licence
 
-Syed Hassaan Areeb Kazmi (Team Owner), Azam Tariq (Developer), Eman Fatima (UI/UX Designer),
-Mohammad Bin Javed, Hudebia. MIT License, see [LICENSE](LICENSE).
+Syed Hassaan Areeb Kazmi (Team Owner), Azam Tariq (Developer), Mohammad Bin Javed (Developer), Hudebia (Developer), Eman Fatima (UI/UX Designer). MIT License, see [LICENSE](LICENSE).

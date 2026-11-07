@@ -65,36 +65,29 @@ def _subject(alert):
 
 
 def alert_card(alert, key, compact=False):
-    """The three-part alert from the original app: what changed / why it matters / suggested action."""
+    """Short first: what changed and the one thing to do now. Chart, reasons and more on demand."""
     colour = theme.ACT if alert.level == ACT else theme.WATCH
     with st.container(border=True):
         theme.html_block(
             f'<div class="of-row">{theme.badge(alert.level)}'
             f'<span class="of-title">{theme.esc(alert.title)}</span>'
-            f'<span class="of-right of-label">{theme.esc(_subject(alert))} · day {alert.day}</span></div>')
-        if compact:
-            left, right = st.container(), st.container()
-        else:
-            left, right = st.columns([1.1, 1], gap="large")
-        with left:
-            theme.html_block(f'{theme.label("1 · What changed")}<div style="margin-top:0.2rem">'
-                             f'{theme.esc(alert.what.summary)}</div>')
+            f'<span class="of-right of-label">{theme.esc(_subject(alert))} · day {alert.day}</span></div>'
+            f'<div class="of-big" style="margin-top:0.4rem">{theme.esc(alert.what.summary)}</div>')
+        if alert.actions:
+            theme.html_block(f'<div class="of-do"><span style="color:{colour}">Do now:</span> '
+                             f'{theme.esc(alert.actions[0])}</div>')
+        with st.expander("Why, chart and more"):
             if len(alert.what.series) > 1:
-                st.plotly_chart(series_chart(alert.what.series, alert.what.baseline, alert.what.unit, height=200,
+                st.plotly_chart(series_chart(alert.what.series, alert.what.baseline, alert.what.unit, height=220,
                                              colour=colour), key=f"chart-{key}", config={"displayModeBar": False})
-        with right:
-            if alert.context:
-                items = "".join(f"<li>{theme.esc(c)}</li>" for c in alert.context)
-                theme.html_block(f'<div class="of-box">{theme.label("Context from your check-ins")}'
-                                 f'<ul style="margin:0.3rem 0 0 0;color:{theme.INK_300}">{items}</ul></div>')
+            for note in alert.context:
+                st.info(note)
             src = source_by_id(alert.why_source_id)
             link = f' <a href="{src.url}" target="_blank">Source</a>' if src else ""
-            theme.html_block(f'<div style="margin-top:0.6rem">{theme.label("2 · Why it matters in spaceflight")}'
-                             f'<div style="color:{theme.INK_300};margin-top:0.2rem">{theme.esc(alert.why_text)}'
-                             f'</div><div style="font-size:0.8rem">{link}</div></div>')
-            actions = "".join(f"<li>{theme.esc(a)}</li>" for a in alert.actions)
-            theme.html_block(f'<div style="margin-top:0.6rem">{theme.label("3 · Suggested action")}'
-                             f'<ul style="margin:0.2rem 0 0 0">{actions}</ul></div>')
+            theme.html_block(f'{theme.label("Why it matters in space")}<div>{theme.esc(alert.why_text)}{link}</div>')
+            if len(alert.actions) > 1:
+                items = "".join(f"<li>{theme.esc(a)}</li>" for a in alert.actions[1:])
+                theme.html_block(f'<div style="margin-top:0.6rem">{theme.label("Also")}<ul>{items}</ul></div>')
 
 
 def checkin_chips(checkin):
@@ -128,26 +121,23 @@ def vitals_chips(v):
 
 
 def plan_card(member, g, exercise_id):
-    """The gravity-adjusted exercise plan. The device load is simulated."""
+    """Today's exercise plan for this gravity. The device load is simulated."""
     plan = build_plan(member.mass_kg, g, exercise_id)
     ex = EXERCISES[exercise_id]
     v = plan.volume
     with st.container(border=True):
-        theme.html_block(f'<div class="of-row"><span class="of-title">Simulated ARED target load</span>'
-                         f'<span class="of-right of-label">simplified prototype model · simulated device</span></div>'
-                         f'<div class="of-muted" style="margin:0.2rem 0 0.4rem 0">{ex.label} at {g:.3g} g for a '
-                         f'{member.mass_kg:g} kg crew member. We simulate the device; we do not control hardware.</div>')
+        theme.html_block(f'<div class="of-row"><span class="of-title">Today’s plan: {ex.label}</span>'
+                         f'<span class="of-right of-label">Simulated ARED target load · at {g:.3g} g</span></div>')
         c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Suggested weight", f"{plan.target_load_kg:.1f} kg",
-                  help=f"Replaces the load gravity no longer gives you, plus the normal training load "
-                       f"({ex.base_training_load_kg} kg). Formula: mass × (1 − g) × {ex.exercise_factor} + base. "
-                       f"Capped at about 272 kg (ARED maximum).{' Cap reached.' if plan.capped else ''}")
-        c2.metric("Body weight", f"{plan.effective_bodyweight_n:.0f} N",
-                  help="Weight your skeleton actually carries: mass × g × 9.81. It falls to zero in microgravity, "
-                       "which is why muscles and bones weaken.")
-        c3.metric("Tempo down / up / hold", f"{plan.tempo.eccentric_s:.1f}/{plan.tempo.concentric_s:.1f}/"
-                  f"{plan.tempo.hold_s:.1f} s",
-                  help="Slower reps at lower gravity keep the muscle working. 1 g: 2/1/0 s, 0 g: 4/2/1 s.")
-        c4.metric("Weekly volume", f"{v.sessions_per_week}× {v.sets}×{v.reps}",
-                  help=f"Sessions per week × sets × reps, about {v.minutes_per_day} min of exercise a day. "
-                       "Less gravity means more exercise.")
+        c1.metric("Weight", f"{plan.target_load_kg:.0f} kg",
+                  help=f"Simulated device load: it replaces the weight gravity no longer gives you, plus the normal "
+                       f"training load ({ex.base_training_load_kg} kg). Formula: mass × (1 − g) × {ex.exercise_factor} "
+                       f"+ base, capped at about 272 kg.{' Cap reached.' if plan.capped else ''}")
+        c2.metric("Down / up", f"{plan.tempo.eccentric_s:.0f} s / {plan.tempo.concentric_s:.0f} s",
+                  help=f"Lower for {plan.tempo.eccentric_s:.1f} s, stand up in {plan.tempo.concentric_s:.1f} s, pause "
+                       f"{plan.tempo.hold_s:.1f} s at the bottom. Less gravity means slower reps.")
+        c3.metric("Sets × reps", f"{v.sets} × {v.reps}",
+                  help=f"{v.sessions_per_week} sessions a week, about {v.minutes_per_day} min of exercise a day.")
+        c4.metric("Body load", f"{plan.effective_bodyweight_n:.0f} N",
+                  help="Weight your skeleton carries: mass × g × 9.81. Zero in microgravity, which is why muscles "
+                       "and bones weaken.")

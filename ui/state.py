@@ -120,7 +120,7 @@ def header(conn):
     colour = theme.NOMINAL if window_open else theme.ACT
     st.html(f"<style>.st-key-comms_toggle button {{ color: {colour} !important; "
             f"border-color: {theme.tint(colour, 0.5)} !important; background: {theme.tint(colour, 0.12)} !important; "
-            f"border-radius: 999px !important; font-size: 0.8rem; }}</style>")
+            f"border-radius: 999px !important; }} .st-key-comms_toggle button p {{ color: {colour} !important; }}</style>")
     comms_col.button(words, key="comms_toggle", on_click=toggle_comms, args=(conn,), width="stretch",
                      help="Simulated comms link to Earth. Click to switch between blackout and an open window.")
     offline_col.markdown(f'<div style="padding-bottom:0.45rem">{theme.pill("Works offline", theme.NOMINAL)}</div>',

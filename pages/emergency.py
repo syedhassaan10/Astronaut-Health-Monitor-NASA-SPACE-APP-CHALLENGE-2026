@@ -27,12 +27,10 @@ ENVIRONMENT_WORDS = {
 conn = state.get_conn()
 ctx = state.context()
 
-theme.page_header("Emergency", "Someone is unwell. Stay calm: this guide walks you through it.")
-st.markdown("**First: call out to your crew and the Crew Medical Officer.** Then answer below. "
-            "The guide updates as you answer.")
-st.caption(DISCLAIMER)
-st.caption(f"Steps are adapted to {ENVIRONMENT_WORDS[ctx.environment]} ({ctx.location.label}). "
-           "Change the location at the top of the page if that is wrong.")
+theme.page_header("Emergency", "Stay calm. Answer the questions; the steps appear below.")
+theme.html_block(f'<div class="of-do" style="border-color:{theme.tint(theme.BAD, 0.4)};'
+                 f'background:{theme.tint(theme.BAD, 0.06)}">First: call your crew and the Crew Medical Officer.</div>')
+st.caption(f"Steps for {ENVIRONMENT_WORDS[ctx.environment]}. {DISCLAIMER}")
 
 patient_id = st.selectbox("Who needs help?", [c.id for c in CREW],
                           index=[c.id for c in CREW].index(ctx.crew.id),

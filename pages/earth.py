@@ -22,8 +22,7 @@ if "receiver" not in st.session_state:
 receiver = st.session_state.receiver
 
 theme.page_header("Earth receiver", "The flight surgeon on the ground. Simulated.")
-st.caption("SIMULATED ground station. It keeps its own inbox and never reads the spacecraft logbook. "
-           "Keep this page open while packets are being sent; a packet sent while nobody listens is lost and re-sent.")
+st.caption("Keep this page open while packets are sent. It has its own inbox and never reads the spacecraft logbook.")
 
 TREND_METRICS = {
     "Squat depth (bottom knee angle, °)": ("depth_deg", "°"),

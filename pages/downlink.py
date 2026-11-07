@@ -36,12 +36,8 @@ if "sender" not in st.session_state:
     st.session_state.sender = DownlinkSender(conn, link)
 sender = st.session_state.sender
 
-theme.page_header("Downlink to Earth", "Send a short summary to the flight surgeon when a comms window opens.")
-st.write("Send a short summary to the flight surgeon on Earth. On a deep-space mission messages take minutes to "
-         "arrive and the link is often down, so the packet waits in a queue, survives a restart, and is sent again "
-         "until Earth confirms it.")
-st.caption("SIMULATED link: one simulated minute of delay = one real second. Open the Earth receiver page in a "
-           "second browser tab to play the ground side.")
+theme.page_header("Downlink to Earth", "Send a short summary to the flight surgeon. It waits until a link is open.")
+st.caption("Simulated link: 1 minute of delay = 1 second. Open the Earth page in a second browser tab.")
 
 # ---- comms window ----------------------------------------------------------------------------
 

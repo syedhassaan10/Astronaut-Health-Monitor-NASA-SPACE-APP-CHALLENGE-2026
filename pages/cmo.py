@@ -15,7 +15,7 @@ state.page_start()
 conn = state.get_conn()
 ctx = state.context()
 
-theme.page_header("Crew Medical Officer view", "Status of all crew, trend estimates and alerts. Decision support only, not a diagnosis.")
+theme.page_header("Crew Medical Officer view", "Who needs attention today, and why. Decision support, not a diagnosis.")
 
 day = st.slider("Mission day (drag back to replay how each crew member's trend developed)", 1, ctx.day, ctx.day,
                 help="Demo feature: the assessments below use only data up to this day.")
