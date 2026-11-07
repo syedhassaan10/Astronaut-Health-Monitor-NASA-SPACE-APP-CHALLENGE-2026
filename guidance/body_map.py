@@ -52,8 +52,8 @@ REGIONS = [
            (), (), ("lower-back",)),
     Region("hips", "Hips and bones", 5.0, 8.6,
            "Carry the body's weight; the hip and spine are the bones that lose the most in space.",
-           "Weight-bearing bones can lose roughly 1-1.5% of density per month without enough exercise. OrbitFit cannot "
-           "measure bone; it tracks the exercise that protects it.",
+           "NASA reports an average loss of 1-1.5% of bone density per month at the hip and spine (Bone Fracture "
+           "Evidence Report, 2024). OrbitFit cannot measure bone; it tracks the exercise that protects it.",
            ("workout",), ("adherence",), ("hip",)),
     Region("knees", "Thigh muscles and knees", 5.0, 5.4,
            "Leg muscles lift and lower you; the knees guide the movement.",

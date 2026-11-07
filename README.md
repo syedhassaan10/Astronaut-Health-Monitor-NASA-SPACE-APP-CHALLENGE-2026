@@ -159,7 +159,7 @@ based on NASA Human Research Program risk pages. These include muscle, bone, car
 nutrition, hypoxia, CO2, sleep, behavioural health and in-flight medical conditions. They also draw on NASA
 technical reports on ISS exercise countermeasures. Each alert and guide links to its source. NASA's Open Science
 Data Repository (OSDR) is named in the challenge as a source of real spaceflight biology data. OrbitFit does not
-load an OSDR dataset at run time; its demo crew data is synthetic and generated on the device. Full list:
+load an OSDR dataset at run time. Its demo crew data is synthetic, but the trends follow published NASA figures (up to 30% leg strength loss without enough exercise, 9% with the ARED device, the 80% strength standard, 1-1.5% bone loss per month); see `data/nasa_evidence.py` and the About page. Full list:
 [guidance/sources.py](guidance/sources.py) and the Sources page.
 
 ## Limitations

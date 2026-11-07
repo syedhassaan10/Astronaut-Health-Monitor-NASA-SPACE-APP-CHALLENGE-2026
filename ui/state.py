@@ -181,10 +181,41 @@ def page_start():
         footer()
         st.stop()
     ctx, data = header(conn, m, team)
+    if m.mode == mission.DEMO:
+        demo_banner()
     sync_alert_log(conn, data, team, ctx.day)
     if m.backup:
         backup.backup_if_due(conn)
     return ctx
+
+
+def demo_banner():
+    """Shown on every page in the demo mission, so nobody takes the sample crew for real astronauts."""
+    theme.html_block(
+        f'<div class="of-do" style="border:2px solid {theme.tint(theme.WARN, 0.5)};background:{theme.tint(theme.WARN, 0.08)};'
+        f'margin:0 0 0.6rem 0">{theme.pill("Demo mission · sample data", theme.WARN)}&nbsp; '
+        "Made-up crew, not real astronauts. Their trends follow published NASA figures, with a 6-month mission "
+        "squeezed into 30 days. Start a real mission on the Mission page.</div>")
+
+
+def demo_evidence_section():
+    """How the demo data is built: each NASA figure, its source and what it shapes."""
+    from data import nasa_evidence
+    from guidance.sources import source_by_id
+    st.subheader("How the demo data is built")
+    st.write("The demo crew is synthetic: no real astronaut data is used. Its trends follow figures published by "
+             "NASA, with a long-duration mission (about 6 months) squeezed into 30 demo days so the changes are "
+             "visible in the demo.")
+    for figure in nasa_evidence.ALL:
+        src = source_by_id(figure.source_id)
+        with st.container(border=True):
+            theme.html_block(f'<div class="of-big"><b>{theme.esc(figure.statement)}</b></div>'
+                             f'<div class="of-muted" style="margin-top:0.3rem">Used for: {theme.esc(figure.used_for)}</div>'
+                             f'<div style="margin-top:0.3rem;font-size:0.9rem"><a href="{src.url}" target="_blank">'
+                             f'{theme.esc(src.title)}</a>, p. {figure.page}</div>')
+    st.caption("Modelling assumptions (not NASA figures): lifting time grows as strength falls (time ∝ 1 / strength), "
+               "and a weaker squat is shallower (60° per 100% strength lost). Check-in and vital-sign patterns are "
+               "illustrative.")
 
 
 def footer():

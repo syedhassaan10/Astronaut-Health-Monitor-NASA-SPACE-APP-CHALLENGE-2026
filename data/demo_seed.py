@@ -11,6 +11,7 @@ import math
 
 from engine.health_types import CheckIn, RepSample, SessionRecord
 from engine.vitals_rules import VitalReading
+from data.nasa_evidence import ARED_STRENGTH_LOSS, UNTREATED_STRENGTH_LOSS, lifting_time
 
 DEMO_DAYS = 30
 PRESCRIBED_REPS = 24  # 3 sets x 8
@@ -59,18 +60,34 @@ def _c1_completion(d):
     return max(0.45, 1 - 0.07 * (d - 21))
 
 
+# Strength lost so far, shaped by published NASA figures (data/nasa_evidence.py). The demo squeezes a
+# long-duration mission into 30 days, so the loss NASA reports over a whole mission is reached by day 30.
+def c1_strength_loss(d):
+    """Rivera misses exercise from day 10: towards NASA's 'up to 30%' leg strength loss by day 30."""
+    return UNTREATED_STRENGTH_LOSS.value * after(d, 10) / (DEMO_DAYS - 10)
+
+
+def c2_strength_loss(d):
+    """Okafor follows the plan: NASA's average 9% lower-body strength loss with ARED, spread over the mission."""
+    return ARED_STRENGTH_LOSS.value * (d - 1) / (DEMO_DAYS - 1)
+
+
+# Modelling assumption: a weaker squat is also a shallower one (60° deeper knee angle per 100% strength lost).
+DEPTH_DEG_PER_STRENGTH_LOST = 60
+
+
 PROFILES = [
     {
         "crew_id": "c1", "seed": 101,
-        "depth": lambda d: 94 + 0.9 * after(d, 10),
-        "concentric": lambda d: 0.9 * (1 + 0.022 * after(d, 10)),
+        "depth": lambda d: 94 + DEPTH_DEG_PER_STRENGTH_LOST * c1_strength_loss(d),
+        "concentric": lambda d: lifting_time(0.9, c1_strength_loss(d)),
         "asymmetry": lambda d: 2.5 + 0.12 * after(d, 12),
         "completion": _c1_completion,
     },
     {
         "crew_id": "c2", "seed": 202,
-        "depth": lambda d: 92,
-        "concentric": lambda d: 0.85,
+        "depth": lambda d: 92 + DEPTH_DEG_PER_STRENGTH_LOST * c2_strength_loss(d),
+        "concentric": lambda d: lifting_time(0.85, c2_strength_loss(d)),
         "asymmetry": lambda d: 2.2,
         "completion": lambda d: 1,
     },

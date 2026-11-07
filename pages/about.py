@@ -69,6 +69,8 @@ st.table({
 st.caption("At 24 fps a 300 ms burst costs more frames than with a 30 fps webcam, so the saving on the clip is "
            "around the 75% target rather than clearly above it. Run it yourself: python -m pose.benchmark")
 
+state.demo_evidence_section()
+
 st.subheader("Limitations")
 st.markdown(
     "- Prototype, not a medical device. Thresholds are demonstration values, not clinically validated or tested "
@@ -77,7 +79,7 @@ st.markdown(
     "- The camera measures squat and deadlift; heel raise has a plan but is not measured yet.\n"
     "- The exercise device load is simulated. The Earth link is simulated.\n"
     "- Vital signs are typed in by the crew; OrbitFit does not connect to medical devices.\n"
-    "- The demo crew data is synthetic.\n"
+    "- The demo crew data is synthetic (its trends follow NASA figures, see above).\n"
     "- The emergency guides follow common first-aid steps; they do not replace the onboard medical procedures."
 )
 

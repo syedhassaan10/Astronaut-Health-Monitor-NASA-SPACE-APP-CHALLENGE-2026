@@ -27,6 +27,8 @@ def show(sources):
             st.caption(s.used_for)
 
 
+state.demo_evidence_section()
+
 st.subheader("NASA references")
 show(NASA_SOURCES)
 st.subheader("Other references")

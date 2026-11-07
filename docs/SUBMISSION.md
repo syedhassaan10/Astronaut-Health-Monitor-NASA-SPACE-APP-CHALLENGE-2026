@@ -85,6 +85,16 @@ its exercise model are based on NASA resources. Each alert and guide links to th
   - Advanced Exercise Concepts overview (Perusek et al., 2015) for the ARED exercise device model (about 272 kg
     maximum);
   - Varanoske et al. (2024) on exercise countermeasures.
+- **NASA figures that shape the demo data:** the demo crew is synthetic (no real astronaut data), but its
+  trends follow published NASA figures, with a 6-month mission squeezed into 30 demo days:
+  - up to 30% leg strength loss on long missions without enough exercise, and a 9% average lower-body loss
+    with the ARED device (NASA/SP-20250000273, January 2025, pp. 5 and 23);
+  - NASA-STD-3001's rule to keep at least 80% of baseline strength (same report, p. 16);
+  - 1-1.5% bone density loss per month at the hip and spine (NASA HRP Bone Fracture Evidence Report, July 2024,
+    p. 10), shown on the body map.
+
+  In one sentence: **Demo crew data is synthetic, shaped by NASA evidence; the app also runs a real mission from an
+  empty logbook.**
 - **NASA Open Science Data Repository (OSDR):** recommended by the challenge for real spaceflight biology data.
   OrbitFit's demo crew data is synthetic and generated on the device. **[If you used an OSDR dataset for testing
   or inspiration, name it here.]**

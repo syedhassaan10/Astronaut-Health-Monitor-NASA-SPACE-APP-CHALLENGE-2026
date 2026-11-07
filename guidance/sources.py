@@ -1,4 +1,4 @@
-"""References and credits. Every URL was opened and checked on 6 November 2026."""
+"""References and credits. Every URL was opened and checked on 6 and 7 November 2026."""
 
 from dataclasses import dataclass
 
@@ -28,6 +28,17 @@ NASA_SOURCES = [
            "NASA Human Research Program (Human Health and Performance)",
            "https://www.nasa.gov/directorates/esdmd/hhp/risk-of-bone-fracture-due-to-spaceflight-induced-changes-to-bone/",
            "Bone loss context for the body map. OrbitFit does NOT estimate bone density."),
+    Source("hrp-bone-2024", "Evidence Report: Risk of Bone Fracture due to Spaceflight-induced Changes to Bone (July 2024)",
+           "NASA Human Research Program",
+           "https://humanresearchroadmap.nasa.gov/evidence/reports/Bone%20Fracture%20Evidence%20Report_07-18-2024.pdf",
+           "Bone mineral density loss of 1-1.5% per month at the hip and spine (p. 10), shown on the body map."),
+    Source("nasa-sp-2025-deconditioning",
+           "Astronaut physiological deconditioning and exercise prescription countermeasures in spaceflight "
+           "(NASA/SP-20250000273, January 2025)",
+           "NASA Office of the Chief Health and Medical Officer",
+           "https://www.nasa.gov/wp-content/uploads/2025/02/sp-20250000273.pdf",
+           "Shapes the demo crew's data: up to 30% leg strength loss without enough exercise (p. 5), 9% average "
+           "lower-body loss with the ARED device (p. 23), and the 80% strength standard (p. 16)."),
     Source("hrp-cardio",
            "Risk of Cardiovascular Adaptations Contributing to Adverse Mission Performance and Health Outcomes (CV Risk)",
            "NASA Human Research Program (Human Health and Performance)",

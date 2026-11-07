@@ -162,3 +162,26 @@ def test_to_log_entry_copies_the_summary():
     e = to_log_entry(alerts[0], 12)
     assert e.summary == alerts[0].what.summary
     assert e.day == 12
+
+
+# ---- demo data shaped by NASA figures --------------------------------------------------------
+
+def test_every_nasa_figure_has_a_real_source_and_page():
+    from data import nasa_evidence
+    from guidance.sources import source_by_id
+    for figure in nasa_evidence.ALL:
+        src = source_by_id(figure.source_id)
+        assert src is not None and src.url.startswith("https://")
+        assert "nasa.gov" in src.url
+        assert figure.page > 0 and len(figure.statement) > 30
+
+
+def test_demo_strength_loss_reaches_the_published_nasa_figures():
+    from data.demo_seed import c1_strength_loss, c2_strength_loss
+    from data.nasa_evidence import ARED_STRENGTH_LOSS, STRENGTH_STANDARD, UNTREATED_STRENGTH_LOSS
+    assert c1_strength_loss(10) == 0
+    assert c1_strength_loss(DEMO_DAYS) == UNTREATED_STRENGTH_LOSS.value       # up to 30% without exercise
+    assert abs(c2_strength_loss(DEMO_DAYS) - ARED_STRENGTH_LOSS.value) < 1e-9  # 9% with ARED
+    # Rivera ends below NASA's 80% strength standard (needs action), Okafor stays above it.
+    assert 1 - c1_strength_loss(DEMO_DAYS) < STRENGTH_STANDARD.value
+    assert 1 - c2_strength_loss(DEMO_DAYS) > STRENGTH_STANDARD.value
