@@ -43,6 +43,28 @@ flash = st.session_state.pop("flash", None)
 if flash:
     st.success(flash)
 
+
+def hide_tour():
+    st.session_state.tour_hidden = True
+
+
+if ctx.mission.mode == "demo" and not st.session_state.get("tour_hidden"):
+    with st.container(border=True):
+        theme.html_block('<div class="of-row"><span class="of-title">Start here · 2-minute tour</span>'
+                         '<span class="of-right of-label">demo mission</span></div>')
+        t1, t2 = st.columns(2)
+        with t1:
+            theme.html_block('<ol class="of-big" style="margin:0.3rem 0 0 1rem">'
+                             "<li><b>3 · Workout</b> tab → <b>Demo Mode</b>: reps are counted and saved live.</li>"
+                             "<li><b>Location</b> (top) → <b>Mars</b>: the plan and the emergency steps change.</li>"
+                             "</ol>")
+        with t2:
+            st.page_link("pages/emergency.py", label="3 · Emergency: answer “Chest pain → Yes”", icon="🚨")
+            st.page_link("pages/guides.py", label="4 · Guides: click the knees and the heart", icon="🫀")
+            st.page_link("pages/cmo.py", label="5 · CMO: drag the mission day back to 8", icon="🩺")
+            st.page_link("pages/downlink.py", label="6 · Downlink: send a summary to Earth", icon="📡")
+        st.button("Hide the tour", on_click=hide_tour, key="hide_tour")
+
 if "exercise" not in st.session_state:
     st.session_state.exercise = "squat"
 with st.container(border=True):
@@ -61,6 +83,22 @@ c1.metric("1 · Check-in", "Done ✓" if routine.checkin else "To do")
 c2.metric("2 · Vitals", "Done ✓" if routine.vitals else "To do")
 c3.metric("3 · Workout", "Done ✓" if routine.workout else "To do")
 c4.metric("Routine streak", f"{days_in_a_row} days", help="Days in a row with check-in, vitals and workout all done.")
+
+# "Your normal": shown while OrbitFit is still learning this person's baselines.
+squat = [e for e in assessment.exercises if e.exercise == "squat"]
+sessions_done = min(3, squat[0].usable_sessions) if squat else 0
+heart_readings = min(3, len([v for v in data.vitals if v.crew_id == crew.id and v.heart_rate is not None]))
+if sessions_done < 3 or heart_readings < 3:
+    with st.container(border=True):
+        theme.html_block(
+            f'<div class="of-row"><span class="of-title">Building your normal</span>'
+            f'<span class="of-muted">Alerts compare you with yourself, so OrbitFit first learns your normal.</span></div>'
+            f'<div style="margin-top:0.4rem">{theme.chip(f"Workouts: {sessions_done} of 3")}'
+            f'{theme.chip(f"Morning heart rate: {heart_readings} of 3")}</div>')
+        p1, p2 = st.columns(2)
+        p1.progress(sessions_done / 3, text="Exercise normal (3 workouts with 5+ good reps)")
+        p2.progress(heart_readings / 3, text="Resting heart rate normal (3 morning readings)")
+        st.caption("Safety ranges for vital signs, pain and the Emergency page already work today.")
 
 tab_checkin, tab_vitals, tab_workout, tab_status = st.tabs(
     ["1 · Check-in", "2 · Vitals", "3 · Workout", "4 · My status"])
@@ -359,7 +397,7 @@ def run_camera(cam):
 
     tracker = Tracker(exercise, ctx.g, estimator.detect, mode=st.session_state.get("sampling_mode") or "adaptive")
     recorder = SessionRecorder(conn, crew, exercise, ctx.g, "webcam" if cam["kind"] == "webcam" else "video",
-                               live_file=live_file if live_file.path else None)
+                               live_file=live_file if live_file.path else None, day=ctx.day)
     resume_id = st.session_state.pop("resume_session", None)
     resume = repo.get_session(conn, resume_id) if resume_id else None
     if resume is not None and resume.crew_id == crew.id and resume.status == "active":

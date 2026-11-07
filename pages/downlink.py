@@ -6,7 +6,6 @@ import uuid
 
 import streamlit as st
 
-from data.crew import CREW
 from db import repo
 from downlink import stores
 from downlink.packet import build_packet, format_kb, packet_size_bytes
@@ -68,17 +67,17 @@ with st.container(border=True):
     window_days = st.select_slider("Days of detail in the packet", [3, 7, 14, 30], value=7)
     data = state.load_data(conn)
     notes = {}
-    for member in CREW:
+    for member in ctx.team:
         note = repo.get_note(conn, member.id)
         if note and note.text.strip():
             notes[member.id] = note.text
-    preview = build_packet(data.records, data.checkins, data.vitals, CREW, ctx.day, window_days, "preview",
+    preview = build_packet(data.records, data.checkins, data.vitals, ctx.team, ctx.day, window_days, "preview",
                            int(time.time() * 1000), notes=notes)
     st.caption(f"Contains: each crew member's status, alerts, latest check-in and vitals, CMO notes, and a "
                f"{window_days}-day table of sessions and check-ins. Size: {format_kb(packet_size_bytes(preview))}.")
     if st.button("Queue packet for Earth", type="primary"):
         packet_id = f"pkt-d{ctx.day}-{uuid.uuid4().hex[:8]}"
-        packet = build_packet(data.records, data.checkins, data.vitals, CREW, ctx.day, window_days, packet_id,
+        packet = build_packet(data.records, data.checkins, data.vitals, ctx.team, ctx.day, window_days, packet_id,
                               int(time.time() * 1000), notes=notes)
         stores.enqueue_packet(conn, packet, time.time() * 1000)
         st.success(f"Queued {packet_id}. It leaves when a comms window is open.")

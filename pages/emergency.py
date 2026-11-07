@@ -4,7 +4,6 @@ import time
 
 import streamlit as st
 
-from data.crew import CREW, crew_by_id
 from db import repo
 from engine.emergency import (
     DISCLAIMER, EMERGENCY, MONITOR, PROTOCOLS, URGENT, EmergencyAnswers, steps_for, triage,
@@ -32,9 +31,9 @@ theme.html_block(f'<div class="of-do" style="border-color:{theme.tint(theme.BAD,
                  f'background:{theme.tint(theme.BAD, 0.06)}">First: call your crew and the Crew Medical Officer.</div>')
 st.caption(f"Steps for {ENVIRONMENT_WORDS[ctx.environment]}. {DISCLAIMER}")
 
-patient_id = st.selectbox("Who needs help?", [c.id for c in CREW],
-                          index=[c.id for c in CREW].index(ctx.crew.id),
-                          format_func=lambda i: crew_by_id(i).name)
+NAMES = state.crew_names(ctx.team)
+patient_id = st.selectbox("Who needs help?", list(NAMES), index=list(NAMES).index(ctx.crew.id),
+                          format_func=lambda i: NAMES[i])
 
 
 def yes_no(question, default_yes, key, help_text=None):

@@ -3,9 +3,7 @@
 import pandas as pd
 import streamlit as st
 
-from data.crew import CREW, crew_by_id
 from db import repo
-from db.logbook_io import export_logbook_csv, import_logbook_csv
 from engine.health_types import SeriesPoint
 from engine.session_metrics import summarize_session
 from ui import state, theme, widgets
@@ -17,10 +15,15 @@ ctx = state.context()
 
 theme.page_header("Crew Medical Officer view", "Who needs attention today, and why. Decision support, not a diagnosis.")
 
-day = st.slider("Mission day (drag back to replay how each crew member's trend developed)", 1, ctx.day, ctx.day,
-                help="Demo feature: the assessments below use only data up to this day.")
+if ctx.day >= 2:
+    day = st.slider("Mission day (drag back to replay how each crew member's trend developed)", 1, ctx.day, ctx.day,
+                    help="The assessments below use only data up to this day.")
+else:
+    day = ctx.day
 data = state.load_data(conn, up_to_day=day)
-assessments = {m.id: state.assess(data, m.id) for m in CREW}
+TEAM = ctx.team
+NAMES = state.crew_names(TEAM)
+assessments = {m.id: state.assess(data, m.id) for m in TEAM}
 
 tab_overview, tab_trends, tab_alerts, tab_log, tab_notes, tab_data = st.tabs(
     ["Overview", "Trends", "Alerts", "Alert log", "Notes", "Logbook data"])
@@ -35,8 +38,9 @@ def latest(items, crew_id):
 # ---- overview --------------------------------------------------------------------------------
 
 with tab_overview:
-    cols = st.columns(len(CREW))
-    for col, member in zip(cols, CREW):
+    cols = st.columns(min(len(TEAM), 4))
+    for index, member in enumerate(TEAM):
+        col = cols[index % len(cols)]
         a = assessments[member.id]
         with col.container(border=True):
             theme.html_block(
@@ -74,7 +78,7 @@ CHECKIN_METRICS = {"Sleep (0-10)": "sleep", "Fatigue (0-10)": "fatigue", "Pain (
 
 with tab_trends:
     t1, t2 = st.columns(2)
-    member_id = t1.selectbox("Crew member", [m.id for m in CREW], format_func=lambda i: crew_by_id(i).name,
+    member_id = t1.selectbox("Crew member", list(NAMES), format_func=lambda i: NAMES[i],
                              key="trend_crew")
     metric = t2.selectbox("Measurement", list(EXERCISE_METRICS) + list(VITAL_METRICS) + list(CHECKIN_METRICS),
                           key="trend_metric")
@@ -120,7 +124,7 @@ with tab_trends:
 
 with tab_alerts:
     any_alerts = False
-    for member in CREW:
+    for member in TEAM:
         a = assessments[member.id]
         if not a.alerts:
             continue
@@ -139,7 +143,7 @@ with tab_log:
     log = [e for e in repo.list_alerts(conn) if e.day <= day]
     if log:
         df = pd.DataFrame([{
-            "key": e.key, "Day": e.day, "Crew member": crew_by_id(e.crew_id).name if crew_by_id(e.crew_id) else e.crew_id,
+            "key": e.key, "Day": e.day, "Crew member": NAMES.get(e.crew_id, e.crew_id),
             "Level": e.level, "Alert": e.title, "What changed": e.summary, "Acknowledged": e.acknowledged,
         } for e in log])
         edited = st.data_editor(df, hide_index=True, width="stretch", disabled=[c for c in df.columns if c != "Acknowledged"],
@@ -153,7 +157,7 @@ with tab_log:
 # ---- notes -----------------------------------------------------------------------------------
 
 with tab_notes:
-    for member in CREW:
+    for member in TEAM:
         note = repo.get_note(conn, member.id)
         text = st.text_area(member.name, value=note.text if note else "", key=f"note-{member.id}", height=120)
         if st.button(f"Save note for {member.name}", key=f"save-note-{member.id}"):
@@ -163,36 +167,7 @@ with tab_notes:
 # ---- logbook data ----------------------------------------------------------------------------
 
 with tab_data:
-    st.write("Everything is stored in a local SQLite file on this computer. Every rep is saved the moment it ends.")
-    counts = {t: repo.count(conn, t) for t in ("sessions", "reps", "checkins", "vitals", "alerts")}
-    st.caption(" · ".join(f"{n} {t}" for t, n in counts.items()))
-
-    st.download_button("⬇ Export logbook as CSV (opens in Excel)", data=export_logbook_csv(conn).encode("utf-8"),
-                       file_name=f"orbitfit-logbook-day{ctx.day}.csv", mime="text/csv")
-
-    upload = st.file_uploader("Import a logbook CSV (adds new rows; never overwrites what is here)", type=["csv"])
-    if upload is not None and st.button("Import this file"):
-        text = upload.getvalue().decode("utf-8-sig", errors="replace")
-        report = import_logbook_csv(conn, text)
-        added = report.added
-        st.success(f"Read {report.total_rows} rows. Added {added['sessions']} sessions, {added['reps']} reps, "
-                   f"{added['checkins']} check-ins, {added['vitals']} vitals. {report.already_present} were already "
-                   "in the logbook and were left untouched.")
-        if report.errors:
-            st.warning(f"{len(report.errors)} rows were skipped:")
-            for err in report.errors[:50]:
-                where = f"line {err.line}: " if err.line else ""
-                st.caption(f"{where}{err.message}")
-
-    st.divider()
-    st.markdown("**Reset demo data**: deletes everything (including notes and live sessions) and restores the "
-                "3 sample crew members with 30 days of history.")
-    confirm = st.checkbox("Yes, delete all logbook data and restore the demo")
-    if st.button("Reset demo data", disabled=not confirm):
-        extra = ["downlink_queue"] if "downlink_queue" in [r[0] for r in conn.execute(
-            "SELECT name FROM sqlite_master WHERE type='table'")] else []
-        repo.reset_demo_data(conn, extra_tables=extra)
-        st.success("Demo data restored.")
-        st.rerun()
+    st.markdown("Export, import, daily backups and starting a new mission are on the Mission page.")
+    st.page_link("pages/mission.py", label="Open the Mission page", icon="🗂️")
 
 state.footer()

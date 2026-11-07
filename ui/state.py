@@ -1,18 +1,18 @@
-"""Shared page state: the logbook connection, the chosen crew member and location, the
-header, loading data and keeping the alert log up to date."""
+"""Shared page state: the logbook connection, the mission and its crew, the chosen crew member and
+location, the header, loading data, the daily backup, and keeping the alert log up to date."""
 
+import os
 from dataclasses import dataclass
 
 import streamlit as st
 
 from config.health_rules import HEALTH_RULES
-from data.crew import CREW, crew_by_id
 from data.locations import LOCATIONS, environment_for_g, location_by_id
-from db import repo
+from db import backup, mission, repo
 from db.database import open_db
+from downlink import stores
 from engine.alert_log import new_log_entries
 from engine.change_detection import assess_crew
-from downlink import stores
 from guidance.routine import routine_for_day
 from ui import theme
 
@@ -26,7 +26,9 @@ class Context:
     location: object    # Location
     g: float
     environment: str    # microgravity / partial / earth
-    day: int
+    day: int            # mission day
+    mission: object     # Mission
+    team: list          # every CrewMember on this mission
 
 
 @dataclass
@@ -37,12 +39,23 @@ class Data:
 
 
 def get_conn():
-    """One logbook connection per browser session; the demo data is seeded on the very first run."""
+    """One logbook connection per browser session."""
     if "conn" not in st.session_state:
         conn = open_db()
-        repo.ensure_seeded(conn)
+        mission.ensure_table(conn)
+        # For automated tests and kiosks: skip the first-start setup and open the demo mission.
+        if os.environ.get("ORBITFIT_START_WITH_DEMO") == "1" and mission.get_mission(conn) is None:
+            mission.start_demo_mission(conn)
         st.session_state.conn = conn
     return st.session_state.conn
+
+
+def crew_list(conn):
+    return mission.list_crew(conn)
+
+
+def crew_names(team):
+    return {c.id: c.name for c in team}
 
 
 def load_data(conn, up_to_day=None):
@@ -60,27 +73,32 @@ def assess(data, crew_id):
     return assess_crew(data.records, crew_id, HEALTH_RULES, data.checkins, data.vitals)
 
 
-def sync_alert_log(conn, data, day=repo.TODAY):
+def sync_alert_log(conn, data, team, day):
     """Write any alert that is new (or newly escalated) into the alert log."""
     known = {a.key for a in repo.list_alerts(conn)}
     entries = []
-    for member in CREW:
+    for member in team:
         entries.extend(new_log_entries(assess(data, member.id).alerts, known, day))
     if entries:
         repo.add_alert_entries(conn, entries)
 
 
 def context():
-    """The crew member and location chosen in the header."""
-    crew = crew_by_id(st.session_state.get("crew_id", CREW[0].id)) or CREW[0]
-    location = location_by_id(st.session_state.get("location_id", "leo"))
+    """The mission, and the crew member and location chosen in the header."""
+    conn = get_conn()
+    m = mission.get_mission(conn)
+    team = crew_list(conn)
+    by_id = {c.id: c for c in team}
+    crew = by_id.get(st.session_state.get("crew_id"), team[0] if team else None)
+    location = location_by_id(st.session_state.get("location_id", m.location_id if m else "leo"))
     if location.id == "custom":
-        g = st.session_state.get("custom_g", 0.5)
+        g = st.session_state.get("custom_g", m.custom_g if m else 0.5)
         environment = environment_for_g(g)
     else:
         g = location.g
         environment = location.environment
-    return Context(crew=crew, location=location, g=g, environment=environment, day=repo.TODAY)
+    return Context(crew=crew, location=location, g=g, environment=environment, day=mission.mission_day(m),
+                   mission=m, team=team)
 
 
 def toggle_comms(conn):
@@ -91,27 +109,35 @@ def toggle_comms(conn):
 # The chosen crew member, location and custom gravity are kept in these settings. Streamlit forgets a
 # widget's value when you switch pages, so each page copies the setting into its picker ("_" key)
 # and the picker copies any change back.
-SETTINGS = {"crew_id": CREW[0].id, "location_id": "leo", "custom_g": 0.5}
+SETTING_NAMES = ["crew_id", "location_id", "custom_g"]
+
+
+def _defaults(m, team):
+    return {"crew_id": team[0].id, "location_id": m.location_id, "custom_g": m.custom_g}
 
 
 def _remember(name):
     st.session_state[name] = st.session_state["_" + name]
 
 
-def _picker_value(name):
-    """Make sure the setting exists and load it into the picker for this page."""
+def _picker_value(name, defaults, team):
+    """Make sure the setting exists (and still fits this mission), then load it into the picker."""
     if name not in st.session_state:
-        st.session_state[name] = SETTINGS[name]
+        st.session_state[name] = defaults[name]
+    if name == "crew_id" and st.session_state[name] not in {c.id for c in team}:
+        st.session_state[name] = defaults[name]
     st.session_state["_" + name] = st.session_state[name]
 
 
-def header(conn):
-    """The original app's header controls: crew, location, comms status, offline badge, today's to-do."""
-    for name in SETTINGS:
-        _picker_value(name)
+def header(conn, m, team):
+    """Header controls: crew, location, comms status, offline badge, today's to-do."""
+    defaults = _defaults(m, team)
+    for name in SETTING_NAMES:
+        _picker_value(name, defaults, team)
+    names = crew_names(team)
     crew_col, location_col, comms_col, offline_col = st.columns([2.2, 2.2, 1.5, 1.3], vertical_alignment="bottom")
-    crew_col.selectbox("Crew", [c.id for c in CREW], key="_crew_id", on_change=_remember, args=("crew_id",),
-                       format_func=lambda i: crew_by_id(i).name)
+    crew_col.selectbox("Crew", list(names), key="_crew_id", on_change=_remember, args=("crew_id",),
+                       format_func=lambda i: names[i])
     location_col.selectbox("Location", [loc.id for loc in LOCATIONS], key="_location_id", on_change=_remember,
                            args=("location_id",), format_func=lambda i: location_by_id(i).label,
                            help="Sets gravity. Gravity changes the exercise plan and the emergency steps.")
@@ -136,18 +162,28 @@ def header(conn):
         todo = theme.pill("Today's routine done ✓", theme.NOMINAL)
     else:
         todo = theme.pill("To do today: " + ", ".join(today.missing()), theme.WATCH)
+    kind = "demo" if m.mode == mission.DEMO else theme.esc(m.name)
     st.markdown(f'<div class="of-row" style="margin:0.2rem 0 0.4rem 0">{todo}'
-                f'{theme.label(f"Mission day {ctx.day} · {ctx.g:.3g} g · {ctx.environment}")}</div>',
+                f'{theme.label(f"{kind} · mission day {ctx.day} · {ctx.g:.3g} g · {ctx.environment}")}</div>',
                 unsafe_allow_html=True)
-    return ctx
+    return ctx, data
 
 
 def page_start():
-    """Call at the top of every page: theme, header, and the alert log kept up to date."""
+    """Call at the top of every page: theme, first-start setup if needed, header, alert log, backup."""
     theme.inject()
     conn = get_conn()
-    ctx = header(conn)
-    sync_alert_log(conn, load_data(conn))
+    m = mission.get_mission(conn)
+    team = crew_list(conn)
+    if m is None or not team:
+        from ui import setup
+        setup.render(conn)
+        footer()
+        st.stop()
+    ctx, data = header(conn, m, team)
+    sync_alert_log(conn, data, team, ctx.day)
+    if m.backup:
+        backup.backup_if_due(conn)
     return ctx
 
 

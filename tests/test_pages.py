@@ -10,7 +10,8 @@ from streamlit.testing.v1 import AppTest  # noqa: E402
 APP = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "app.py")
 
 PAGES = ["pages/today.py", "pages/emergency.py", "pages/guides.py", "pages/cmo.py", "pages/about.py",
-         "pages/sources.py", "pages/downlink.py", "pages/earth.py"]
+         "pages/sources.py", "pages/downlink.py", "pages/earth.py",
+         "pages/mission.py"]
 
 
 @pytest.fixture(autouse=True)
@@ -18,6 +19,7 @@ def temp_logbook(tmp_path, monkeypatch):
     monkeypatch.setenv("ORBITFIT_DB", str(tmp_path / "orbitfit.db"))
     monkeypatch.setenv("ORBITFIT_LINK_DB", str(tmp_path / "link.db"))
     monkeypatch.setenv("ORBITFIT_EARTH_DB", str(tmp_path / "earth.db"))
+    monkeypatch.setenv("ORBITFIT_START_WITH_DEMO", "1")
     monkeypatch.chdir(os.path.dirname(os.path.dirname(__file__)))
 
 
@@ -112,3 +114,52 @@ def test_the_chosen_location_and_crew_member_survive_a_page_change():
     assert at.selectbox(key="_location_id").value == "moon"
     assert at.selectbox(key="_crew_id").value == "c3"
     assert "Moon" in " ".join(c.value for c in at.caption)
+
+
+# ---- first-start setup ---------------------------------------------------------------------
+
+def first_start(monkeypatch):
+    monkeypatch.delenv("ORBITFIT_START_WITH_DEMO")
+    at = AppTest.from_file(str(APP), default_timeout=60)
+    at.run()
+    return at
+
+
+def test_first_start_shows_the_setup_and_the_demo_button_opens_the_demo(monkeypatch):
+    at = first_start(monkeypatch)
+    assert not at.exception
+    assert "Welcome to OrbitFit" in at.title[0].value
+    at.button(key="setup_demo").click()
+    at.run()
+    assert "Astronaut view" in at.title[0].value
+    text = " ".join(m.value for m in at.markdown)
+    assert "Start here" in text  # the judge tour
+
+
+def test_setting_up_a_new_mission_end_to_end(monkeypatch):
+    at = first_start(monkeypatch)
+    at.button(key="setup_new").click()
+    at.run()
+    at.text_input[0].set_value("Mars transit")
+    at.button(key="setup_next").click()
+    at.run()
+    # The crew table is filled in as a person would type it.
+    at.session_state["setup"]["crew"] = [{"name": "Ana Silva", "role": "Commander", "mass_kg": 68},
+                                         {"name": "Ravi Rao", "role": "Engineer", "mass_kg": 81}]
+    at.run()
+    at.button(key="setup_next").click()
+    at.run()
+    at.button(key="setup_next").click()       # step 4: your normal
+    at.run()
+    assert at.button(key="setup_next").disabled  # must acknowledge first
+    at.checkbox[0].check()
+    at.run()
+    at.button(key="setup_next").click()       # start mission
+    at.run()
+    assert not at.exception
+    assert "Astronaut view" in at.title[0].value
+    assert at.selectbox(key="_crew_id").options == ["Ana Silva", "Ravi Rao"]
+    text = " ".join(m.value for m in at.markdown)
+    assert "Building your normal" in text
+    assert "Start here" not in text            # no judge tour on a real mission
+    assert "mission day 1" in text.lower()

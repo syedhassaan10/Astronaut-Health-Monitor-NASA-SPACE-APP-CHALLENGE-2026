@@ -80,6 +80,19 @@ no usage statistics are sent.
 > If PowerShell refuses to run `Activate.ps1`, skip it and call the venv's Python directly:
 > `.venv\Scripts\python.exe -m streamlit run app.py`.
 
+### First start
+
+A short setup appears once:
+
+1. **Choose:** *Open the demo* (3 sample crew members with 30 days of history, best for judges) or
+   *Set up a new mission*.
+2. **Mission:** name, start date (the mission day is counted from it), location and the usual delay to Earth.
+3. **Crew:** names, roles and body weights, and who is the Crew Medical Officer.
+4. **Your normal:** how OrbitFit learns each person's baseline (first 3 workouts, first 3 morning heart rates).
+5. **Data and privacy:** where the data lives, a daily backup, and a "not a medical device" acknowledgement.
+
+Everything can be changed later on the **Mission** page, which also has export, import, backups and *start over*.
+
 ### Try it in two minutes
 
 1. **Today → 3 · Workout → ▶ Demo Mode.** A sample squat video plays; reps are counted and saved as they happen.
@@ -97,7 +110,7 @@ no usage statistics are sent.
 python -m pytest -q
 ```
 
-287 tests cover:
+300 tests cover:
 
 - **Engine:** pose math, rep detector, form scoring, frame sampler, gravity engine, all health and vitals rules,
   emergency triage, alert log.
@@ -120,7 +133,9 @@ python -m pytest -q
 | Logbook file | `ORBITFIT_DB` (default `var/orbitfit.db`) |
 | Pose model file | `ORBITFIT_POSE_MODEL` (default `assets/models/pose_landmarker_lite.task`, included) |
 | Simulated link and Earth inbox | `ORBITFIT_LINK_DB`, `ORBITFIT_EARTH_DB` (default in `var/`) |
-| Start again with fresh demo data | Crew Medical Officer → Logbook data → Reset demo data |
+| Start over (new mission or demo) | Mission → Start over |
+| Daily backups | Mission → Your data (files in `var/backups`, last 14 kept) |
+| Skip the setup and open the demo | `ORBITFIT_START_WITH_DEMO=1` (used by the tests) |
 
 ## Folders
 
