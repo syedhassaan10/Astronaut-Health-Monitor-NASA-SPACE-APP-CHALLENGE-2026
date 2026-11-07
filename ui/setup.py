@@ -68,7 +68,7 @@ def _nav(back_step, next_label="Next", next_disabled=False):
 def _step_choose(conn):
     theme.page_header("Welcome to OrbitFit", "Health self-monitoring for astronauts. Set up in about two minutes.")
     demo_col, new_col = st.columns(2, gap="large")
-    with demo_col.container(border=True):
+    with theme.card(demo_col):
         theme.html_block('<div class="of-title">Try the demo mission</div>'
                          '<div class="of-big" style="margin:0.4rem 0 0.8rem 0">3 sample crew members with 30 days '
                          'of history. Best for a first look and for judges.</div>')
@@ -76,7 +76,7 @@ def _step_choose(conn):
             mission.start_demo_mission(conn)
             st.session_state.pop("setup", None)
             st.rerun()
-    with new_col.container(border=True):
+    with theme.card(new_col):
         theme.html_block('<div class="of-title">Start a new mission</div>'
                          '<div class="of-big" style="margin:0.4rem 0 0.8rem 0">Your own crew and an empty logbook. '
                          'Mission days are counted from your start date.</div>')
@@ -90,7 +90,7 @@ def _step_mission():
     d = _data()
     theme.page_header("Your mission", "Where you are sets gravity, the exercise plan and the emergency steps.")
     _progress(2)
-    with st.container(border=True):
+    with theme.card():
         name = st.text_input("Mission name", value=d["name"], placeholder="e.g. Artemis training, Mars transit")
         start = st.date_input("Mission start date (day 1)", value=d["start_date"], max_value=date.today(),
                               help="The mission day is counted from this date.")
@@ -130,7 +130,7 @@ def _step_crew():
     d = _data()
     theme.page_header("Your crew", "Body weight sets each person's exercise load. Add or remove rows as needed.")
     _progress(3)
-    with st.container(border=True):
+    with theme.card():
         edited = st.data_editor(
             pd.DataFrame(d["crew"], columns=["name", "role", "mass_kg"]), num_rows="dynamic", width="stretch",
             key="setup_crew_editor", hide_index=True,
@@ -173,10 +173,10 @@ def _step_normal():
     ]
     cols = st.columns(3)
     for col, (title, text) in zip(cols, cards):
-        with col.container(border=True):
+        with theme.card(col):
             theme.html_block(f'<div class="of-title">{title}</div><div class="of-big" style="margin-top:0.4rem">'
                              f'{theme.esc(text)}</div>')
-    with st.container(border=True):
+    with theme.card():
         theme.html_block(f'{theme.label("Camera set-up for workouts")}<ul class="of-big">'
                          "<li>Camera 1.5 to 2 m away, at hip height.</li>"
                          "<li>Hips, knees and ankles in view; good light from the front.</li>"
@@ -192,7 +192,7 @@ def _step_privacy(conn):
     d = _data()
     theme.page_header("Your data", "It stays on this computer. You decide what is sent to Earth.")
     _progress(5)
-    with st.container(border=True):
+    with theme.card():
         theme.html_block(
             f'<div class="of-big">The logbook is one file on this computer:</div>'
             f'<div class="of-chip" style="margin:0.4rem 0">{theme.esc(default_db_path())}</div>'

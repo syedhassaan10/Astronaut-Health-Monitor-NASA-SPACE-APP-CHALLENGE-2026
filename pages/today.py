@@ -49,7 +49,7 @@ def hide_tour():
 
 
 if ctx.mission.mode == "demo" and not st.session_state.get("tour_hidden"):
-    with st.container(border=True):
+    with theme.card():
         theme.html_block('<div class="of-row"><span class="of-title">Start here · 2-minute tour</span>'
                          '<span class="of-right of-label">demo mission</span></div>')
         t1, t2 = st.columns(2)
@@ -67,7 +67,7 @@ if ctx.mission.mode == "demo" and not st.session_state.get("tour_hidden"):
 
 if "exercise" not in st.session_state:
     st.session_state.exercise = "squat"
-with st.container(border=True):
+with theme.card():
     theme.html_block(f'{theme.label("Active crew member")}'
                      f'<div style="font-size:1.15rem;margin:0.2rem 0 0.4rem 0">{theme.esc(crew.name)} '
                      f'<span style="color:{theme.INK_300}">· {theme.esc(crew.role)}</span>'
@@ -89,7 +89,7 @@ squat = [e for e in assessment.exercises if e.exercise == "squat"]
 sessions_done = min(3, squat[0].usable_sessions) if squat else 0
 heart_readings = min(3, len([v for v in data.vitals if v.crew_id == crew.id and v.heart_rate is not None]))
 if sessions_done < 3 or heart_readings < 3:
-    with st.container(border=True):
+    with theme.card():
         theme.html_block(
             f'<div class="of-row"><span class="of-title">Building your normal</span>'
             f'<span class="of-muted">Alerts compare you with yourself, so OrbitFit first learns your normal.</span></div>'
@@ -120,7 +120,7 @@ with tab_checkin:
     for c in data.checkins:
         if c.crew_id == crew.id and c.day == ctx.day:
             existing = c
-    with st.container(border=True):
+    with theme.card():
         theme.html_block(
             f'<div class="of-row"><span class="of-title">Daily check-in</span>'
             f'<span class="of-muted">· about 30 seconds</span>'
@@ -169,7 +169,7 @@ with tab_vitals:
     for v in data.vitals:
         if v.crew_id == crew.id and v.day == ctx.day:
             today_vitals = v
-    with st.container(border=True):
+    with theme.card():
         theme.html_block(
             '<div class="of-row"><span class="of-title">Vital signs</span>'
             '<span class="of-right of-label">demonstration ranges · resting adult</span></div>'
@@ -191,7 +191,7 @@ with tab_vitals:
             st.rerun()
 
     if today_vitals is not None:
-        with st.container(border=True):
+        with theme.card():
             theme.html_block(theme.label("What today's numbers mean"))
             for field, label, guide_id, rng, *_ in VITAL_FIELDS:
                 value = getattr(today_vitals, field)
@@ -223,7 +223,7 @@ with tab_vitals:
 # ---- 4. my trend status (drawn before the workout so the camera loop can run last) -----------
 
 with tab_status:
-    with st.container(border=True):
+    with theme.card():
         theme.html_block(
             f'<div class="of-row"><span class="of-title">My trend status</span>{theme.badge(assessment.status, True)}'
             f'<span class="of-muted">{widgets.STATUS[assessment.status][2]}</span>'
@@ -264,7 +264,7 @@ with tab_workout:
     if unfinished and not camera:
         s = unfinished[-1]
         n = len(repo.session_reps(conn, s.id))
-        with st.container(border=True):
+        with theme.card():
             st.warning(f"An unfinished {EXERCISES[s.exercise].label.lower()} session with {n} saved reps was found "
                        "(the app stopped mid-set). Nothing was lost.")
             r1, r2 = st.columns(2)
@@ -276,7 +276,7 @@ with tab_workout:
                 repo.finish_session(conn, s.id)
                 st.rerun()
 
-    with st.container(border=True):
+    with theme.card():
         theme.html_block('<div class="of-row"><span class="of-label">Camera · measure your squats</span>'
                          '<span class="of-right of-label">on-device pose estimate · every rep is saved to the offline '
                          'logbook as it completes</span></div>')

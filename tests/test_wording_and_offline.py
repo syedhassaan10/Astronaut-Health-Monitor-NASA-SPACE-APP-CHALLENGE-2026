@@ -80,3 +80,14 @@ def test_the_menu_is_never_hidden_on_phones_and_tablets():
     assert '[data-testid="stSidebar"]{{display:none' not in compact
     assert '[data-testid="stSidebar"],[data-testid="stSidebarCollapsedControl"]{display:none' not in compact
     assert 'content: "Menu"' in CSS
+
+
+def test_only_real_cards_get_the_card_style():
+    # Plain blocks (like auto-refreshing sections) must not look like cards with no padding.
+    from ui.theme import CSS
+    assert '[class*="st-key-card_"]' in CSS
+    assert '[data-testid="stLayoutWrapper"] > [data-testid="stVerticalBlock"]' not in CSS
+    for path in list((ROOT / "pages").glob("*.py")) + list((ROOT / "ui").glob("*.py")):
+        if path.name == "theme.py":
+            continue
+        assert "container(border=True)" not in path.read_text(encoding="utf-8"), path.name

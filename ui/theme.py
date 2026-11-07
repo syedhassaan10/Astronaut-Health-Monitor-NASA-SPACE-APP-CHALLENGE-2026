@@ -99,8 +99,8 @@ header[data-testid="stHeader"] button svg {{ width: 1.6rem; height: 1.6rem; }}
 [data-testid="stExpandSidebarButton"]::after {{ content: "Menu"; font-size: 1.05rem; font-weight: 700; color: {TEXT}; }}
 
 /* ---- white glass cards ---------------------------------------------------------------- */
-[data-testid="stLayoutWrapper"] > [data-testid="stVerticalBlock"],
-[data-testid="stVerticalBlockBorderWrapper"]:has(> div > [data-testid="stVerticalBlock"]) {{
+/* Only containers made with theme.card() (key "card_...") are cards; plain blocks stay plain. */
+[class*="st-key-card_"] {{
   background: {CARD}; border: 1px solid {STROKE} !important; border-radius: 22px !important;
   backdrop-filter: blur(16px); box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
 }}
@@ -251,7 +251,26 @@ header[data-testid="stHeader"] button svg {{ width: 1.6rem; height: 1.6rem; }}
 
 
 def inject():
+    reset_cards("p")
     st.html(CSS)
+
+
+def reset_cards(prefix):
+    """Start numbering cards again. Each auto-refreshing section uses its own prefix so its cards keep
+    the same keys every time it refreshes."""
+    st.session_state["_card_prefix"] = prefix
+    st.session_state["_card_count"] = 0
+
+
+def card(where=None):
+    """A bordered card in the OrbitFit style (st.container(border=True) with a "card_..." key)."""
+    if "_card_prefix" not in st.session_state:
+        reset_cards("p")
+    st.session_state["_card_count"] += 1
+    key = f"card_{st.session_state['_card_prefix']}_{st.session_state['_card_count']}"
+    if where is None:
+        where = st
+    return where.container(border=True, key=key)
 
 
 def esc(text):

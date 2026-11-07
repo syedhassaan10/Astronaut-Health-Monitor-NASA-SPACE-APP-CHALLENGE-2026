@@ -67,7 +67,7 @@ def _subject(alert):
 def alert_card(alert, key, compact=False):
     """Short first: what changed and the one thing to do now. Chart, reasons and more on demand."""
     colour = theme.ACT if alert.level == ACT else theme.WATCH
-    with st.container(border=True):
+    with theme.card():
         theme.html_block(
             f'<div class="of-row">{theme.badge(alert.level)}'
             f'<span class="of-title">{theme.esc(alert.title)}</span>'
@@ -125,7 +125,7 @@ def plan_card(member, g, exercise_id):
     plan = build_plan(member.mass_kg, g, exercise_id)
     ex = EXERCISES[exercise_id]
     v = plan.volume
-    with st.container(border=True):
+    with theme.card():
         theme.html_block(f'<div class="of-row"><span class="of-title">Today’s plan: {ex.label}</span>'
                          f'<span class="of-right of-label">Simulated ARED target load · at {g:.3g} g</span></div>')
         c1, c2, c3, c4 = st.columns(4)

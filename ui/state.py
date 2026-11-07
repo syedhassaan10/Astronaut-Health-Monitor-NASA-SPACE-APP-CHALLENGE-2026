@@ -208,7 +208,7 @@ def demo_evidence_section():
              "visible in the demo.")
     for figure in nasa_evidence.ALL:
         src = source_by_id(figure.source_id)
-        with st.container(border=True):
+        with theme.card():
             theme.html_block(f'<div class="of-big"><b>{theme.esc(figure.statement)}</b></div>'
                              f'<div class="of-muted" style="margin-top:0.3rem">Used for: {theme.esc(figure.used_for)}</div>'
                              f'<div style="margin-top:0.3rem;font-size:0.9rem"><a href="{src.url}" target="_blank">'

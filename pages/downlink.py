@@ -62,8 +62,8 @@ with c2:
 
 # ---- build a packet --------------------------------------------------------------------------
 
-with st.container(border=True):
-    st.markdown("**New flight surgeon packet**")
+with theme.card():
+    theme.html_block('<div class="of-title">New flight surgeon packet</div>')
     window_days = st.select_slider("Days of detail in the packet", [3, 7, 14, 30], value=7)
     data = state.load_data(conn)
     notes = {}
@@ -100,6 +100,7 @@ def step_bar(current):
 
 @st.fragment(run_every=1.0)
 def queue_panel():
+    theme.reset_cards("queue")
     window = stores.get_setting(conn, "window_open", False)
     latency = stores.get_setting(conn, "latency_min", 10)
     sender.tick(window, latency * 1000)
@@ -115,8 +116,10 @@ def queue_panel():
     for item, size, day in items:
         phase = phase_of(item, window)
         title, detail = PHASE_WORDS[phase]
-        with st.container(border=True):
-            st.markdown(f"**{item.id}** · mission day {day} · {format_kb(size)} · tries: {item.attempts}")
+        with theme.card():
+            theme.html_block(f'<div class="of-row"><span class="of-title">{theme.esc(item.id)}</span>'
+                             f'{theme.chip(f"Mission day {day}")}{theme.chip(format_kb(size))}'
+                             f'{theme.chip(f"Tries: {item.attempts}")}</div>')
             st.markdown(step_bar(STEP_OF_PHASE[phase]), unsafe_allow_html=True)
             if phase == "in-transit" and item.sent_at is not None and item.deliver_at:
                 share = (now - item.sent_at) / max(1.0, item.deliver_at - item.sent_at)

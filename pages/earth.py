@@ -51,6 +51,7 @@ def vitals_text(v):
 
 @st.fragment(run_every=1.0)
 def inbox():
+    theme.reset_cards("earth")
     receiver.tick()
     packets = stores.earth_packets(earth)
     if receiver.received:
@@ -65,16 +66,21 @@ def inbox():
 
     latest = packets[-1]
     summary = latest["summary"]
-    st.subheader(f"Latest packet: {latest['id']} · mission day {latest['missionDay']}")
+    day_chip = theme.chip("Mission day " + str(latest["missionDay"]))
+    theme.html_block('<div class="of-row" style="margin-top:0.4rem"><span class="of-title">Latest packet</span>'
+                     + theme.chip(latest["id"]) + day_chip + "</div>")
     st.caption(summary["disclaimer"])
-    cols = st.columns(max(1, len(summary["crew"])))
-    for col, c in zip(cols, summary["crew"]):
-        with col.container(border=True):
-            st.markdown(f"**{c['name']}**  \n{c.get('role', '')}")
-            widgets.show_status(c["status"], "1.1rem")
+    cols = st.columns(min(4, max(1, len(summary["crew"]))))
+    for index, c in enumerate(summary["crew"]):
+        with theme.card(cols[index % len(cols)]):
+            theme.html_block(
+                f'<div class="of-row"><div><div class="of-title">{theme.esc(c["name"])}</div>'
+                f'<div class="of-muted">{theme.esc(c.get("role", ""))}</div></div>'
+                f'<span class="of-right">{theme.badge(c["status"], True)}</span></div>')
             for a in c["alerts"]:
-                st.markdown(f"{widgets.status_html(a['level'], '0.85rem')} **{a['title']}**  \n{a['summary']}",
-                            unsafe_allow_html=True)
+                theme.html_block(f'<div style="margin-top:0.6rem">{theme.badge(a["level"])} '
+                                 f'<b>{theme.esc(a["title"])}</b></div>'
+                                 f'<div class="of-muted" style="margin-top:0.15rem">{theme.esc(a["summary"])}</div>')
             ci = c.get("latestCheckin")
             if ci:
                 where = f" ({LOCATION_LABEL.get(ci['painLocation'], ci['painLocation'])})" if ci.get("painLocation") else ""

@@ -42,7 +42,7 @@ with tab_overview:
     for index, member in enumerate(TEAM):
         col = cols[index % len(cols)]
         a = assessments[member.id]
-        with col.container(border=True):
+        with theme.card(col):
             theme.html_block(
                 f'<div class="of-row"><div><div class="of-title">{theme.esc(member.name)}</div>'
                 f'<div class="of-muted">{theme.esc(member.role)}</div></div>'

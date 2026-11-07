@@ -22,7 +22,7 @@ st.write(
 
 def show(sources):
     for s in sources:
-        with st.container(border=True):
+        with theme.card():
             st.markdown(f"**[{s.title}]({s.url})**  \n{s.organization}")
             st.caption(s.used_for)
 

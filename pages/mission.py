@@ -19,7 +19,7 @@ theme.page_header("Mission", "Your mission, your crew and your data.")
 
 # ---- mission ---------------------------------------------------------------------------------
 
-with st.container(border=True):
+with theme.card():
     kind = "Demo mission with sample data" if is_demo else "Real mission"
     theme.html_block(f'<div class="of-row"><span class="of-title">{theme.esc(m.name)}</span>'
                      f'<span class="of-right of-label">{kind}</span></div>'
@@ -45,11 +45,13 @@ with st.container(border=True):
 
 # ---- crew ------------------------------------------------------------------------------------
 
-with st.container(border=True):
+with theme.card():
     theme.html_block(f'<div class="of-title">Crew ({len(ctx.team)})</div>')
     rows = ""
     for c in ctx.team:
-        cmo = " · Crew Medical Officer" if c.id == m.cmo_id else ""
+        cmo = ""
+        if c.id == m.cmo_id and "medical officer" not in c.role.lower():
+            cmo = " · Crew Medical Officer"
         rows += f"<tr><td>{theme.esc(c.name)}</td><td>{theme.esc(c.role)}{cmo}</td><td>{c.mass_kg:g} kg</td></tr>"
     theme.html_block(f'<table class="of-table"><tr><th>Name</th><th>Role</th><th>Body weight</th></tr>{rows}</table>')
     if is_demo:
@@ -89,7 +91,7 @@ with st.container(border=True):
 
 # ---- data and privacy ------------------------------------------------------------------------
 
-with st.container(border=True):
+with theme.card():
     theme.html_block('<div class="of-title">Your data</div>'
                      '<div class="of-big" style="margin-top:0.3rem">Everything stays on this computer, in one file:</div>'
                      f'<div class="of-chip" style="margin:0.4rem 0">{theme.esc(default_db_path())}</div>')

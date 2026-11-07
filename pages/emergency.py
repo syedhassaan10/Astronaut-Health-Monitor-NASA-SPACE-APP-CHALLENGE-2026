@@ -42,7 +42,7 @@ def yes_no(question, default_yes, key, help_text=None):
     return answer == "Yes"
 
 
-with st.container(border=True):
+with theme.card():
     theme.html_block(theme.label("1 · Check the person"))
     left, right = st.columns(2)
     with left:
@@ -83,7 +83,7 @@ st.markdown(f'<div style="border:2px solid {theme.tint(colour, 0.6)};background:
 st.subheader("3 · What to do")
 for protocol_id in result.protocols:
     guide = PROTOCOLS[protocol_id]
-    with st.container(border=True):
+    with theme.card():
         st.markdown(f"### {guide['title']}")
         st.caption(guide["goal"])
         for i, step in enumerate(steps_for(protocol_id, ctx.environment), start=1):
