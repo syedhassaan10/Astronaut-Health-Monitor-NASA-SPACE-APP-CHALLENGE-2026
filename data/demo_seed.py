@@ -190,6 +190,9 @@ VITAL_PROFILES = [
 ]
 
 
+DEMO_DAILY_DOSE_MSV = 1.8
+
+
 def generate_demo_vitals():
     out = []
     for p in VITAL_PROFILES:
@@ -201,9 +204,12 @@ def generate_demo_vitals():
             temperature = round(p["temperature_c"] + gauss(r) * 0.15, 1)
             glucose = round(p["glucose"] + gauss(r) * 5)
             spo2 = round(min(100, p["spo2"] + gauss(r) * 0.5))
+            # Daily dosimeter reading around the deep-space background (1.8 mSv a day, MSL RAD).
+            radiation = round(max(0.0, DEMO_DAILY_DOSE_MSV + gauss(r) * 0.15), 1)
             out.append(VitalReading(id=f"{p['crew_id']}-v{day}", crew_id=p["crew_id"], day=day,
                                     heart_rate=heart_rate, systolic=systolic, diastolic=diastolic,
-                                    temperature_c=temperature, glucose_mg_dl=glucose, spo2_pct=spo2))
+                                    temperature_c=temperature, glucose_mg_dl=glucose, spo2_pct=spo2,
+                                    radiation_msv=radiation))
     return out
 
 

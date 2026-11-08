@@ -71,7 +71,7 @@ def _vitals_from_row(row):
     return VitalReading(
         id=row["id"], crew_id=row["crew_id"], day=row["day"], heart_rate=row["heart_rate"], systolic=row["systolic"],
         diastolic=row["diastolic"], temperature_c=row["temperature_c"], glucose_mg_dl=row["glucose_mg_dl"],
-        spo2_pct=row["spo2_pct"],
+        spo2_pct=row["spo2_pct"], radiation_msv=row["radiation_msv"],
     )
 
 
@@ -118,8 +118,9 @@ def _insert_vitals(conn, v, replace=True):
     verb = "INSERT OR REPLACE" if replace else "INSERT OR IGNORE"
     conn.execute(
         f"{verb} INTO vitals (id, crew_id, day, heart_rate, systolic, diastolic, temperature_c, glucose_mg_dl, "
-        "spo2_pct) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        (v.id, v.crew_id, v.day, v.heart_rate, v.systolic, v.diastolic, v.temperature_c, v.glucose_mg_dl, v.spo2_pct),
+        "spo2_pct, radiation_msv) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (v.id, v.crew_id, v.day, v.heart_rate, v.systolic, v.diastolic, v.temperature_c, v.glucose_mg_dl, v.spo2_pct,
+         v.radiation_msv),
     )
 
 
@@ -239,10 +240,11 @@ def load_checkins(conn):
 
 
 def save_vitals(conn, crew_id, day, heart_rate=None, systolic=None, diastolic=None, temperature_c=None,
-                glucose_mg_dl=None, spo2_pct=None):
+                glucose_mg_dl=None, spo2_pct=None, radiation_msv=None):
     """One set of vitals per crew member per mission day: saving again replaces it."""
     v = VitalReading(id=vitals_id(crew_id, day), crew_id=crew_id, day=day, heart_rate=heart_rate, systolic=systolic,
-                     diastolic=diastolic, temperature_c=temperature_c, glucose_mg_dl=glucose_mg_dl, spo2_pct=spo2_pct)
+                     diastolic=diastolic, temperature_c=temperature_c, glucose_mg_dl=glucose_mg_dl, spo2_pct=spo2_pct,
+                     radiation_msv=radiation_msv)
     _insert_vitals(conn, v)
     return v
 
@@ -357,7 +359,7 @@ def seed_demo_data(conn):
             _insert_vitals(conn, VitalReading(
                 id=vitals_id(v.crew_id, v.day), crew_id=v.crew_id, day=v.day, heart_rate=v.heart_rate,
                 systolic=v.systolic, diastolic=v.diastolic, temperature_c=v.temperature_c,
-                glucose_mg_dl=v.glucose_mg_dl, spo2_pct=v.spo2_pct))
+                glucose_mg_dl=v.glucose_mg_dl, spo2_pct=v.spo2_pct, radiation_msv=v.radiation_msv))
         for e in log:
             _insert_alert(conn, e, MISSION_START + e.day * DAY_MS)
 

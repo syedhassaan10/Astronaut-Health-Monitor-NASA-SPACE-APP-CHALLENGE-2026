@@ -36,8 +36,9 @@ REGIONS = [
            ("spo2_pct",), ("spo2_pct",), ()),
     Region("immune", "Immune system and temperature", 5.0, 12.4,
            "Fights infection; fever is one of its signals.",
-           "Immune function changes in flight and dormant viruses can reactivate. A closed cabin spreads illness quickly.",
-           ("temperature_c",), ("temperature_c",), ()),
+           "Immune function changes in flight and dormant viruses can reactivate. A closed cabin spreads illness quickly. "
+           "Space radiation also affects blood-forming and immune cells, so the daily dose is tracked here.",
+           ("temperature_c", "radiation_msv"), ("temperature_c", "radiation_msv", "mission_dose"), ()),
     Region("energy", "Energy and nutrition", 5.0, 10.6,
            "Turns food into the fuel muscles and the brain use; blood sugar shows how well that is balanced.",
            "Food choices are limited, appetite changes and exercise load is high, so energy balance can drift.",

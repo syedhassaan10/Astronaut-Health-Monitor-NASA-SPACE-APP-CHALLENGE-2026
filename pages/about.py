@@ -42,7 +42,8 @@ st.markdown(
     "- **Distance from Earth**: all analysis on the device; emergency guidance that does not need the ground; a "
     "simulated downlink with delay, blackouts and acknowledgements.\n"
     "- **Closed environment**: oxygen saturation and cabin-air checks in the emergency guides.\n"
-    "- Not addressed: radiation dose."
+    "- **Radiation**: daily dose from each person's dosimeter, a shelter alert for a solar storm, and the "
+    "mission total against NASA's 600 mSv career limit."
 )
 
 st.subheader("How it works")
@@ -92,6 +93,6 @@ st.markdown(
 
 st.subheader("Team")
 st.write("Built for the NASA Space Apps Challenge 2026 by Syed Hassaan Areeb Kazmi (Team Owner), Azam Tariq "
-         "(Developer), Eman Fatima (UI/UX Designer), Mohammad Bin Javed and Hudebia.")
+         "(Developer), Mohammad Bin Javed (Developer), Hudebia Shaikh (Developer) and Eman Fatima (UI/UX Designer).")
 
 state.footer()

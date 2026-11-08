@@ -27,6 +27,7 @@ class VitalReading:
     temperature_c: float | None = None
     glucose_mg_dl: float | None = None
     spo2_pct: float | None = None
+    radiation_msv: float | None = None  # dose for the day from the personal dosimeter
 
 
 # What each vital is called, its unit, why it matters in space and what to do.
@@ -77,6 +78,34 @@ VITALS = {
                "or heart problem or from a problem with the cabin atmosphere (a hostile closed environment).",
         "high": "Oxygen saturation is high",
         "low": "Oxygen saturation is low",
+    },
+    "radiation_msv": {
+        "label": "Radiation dose",
+        "unit": "mSv",
+        "source": "nasa-std-3001",
+        "why": "Space radiation raises the long-term risk of cancer and can harm the nervous system, heart and eyes. "
+               "A day far above the usual background usually means a solar particle event, when the crew should "
+               "move to the most shielded part of the spacecraft.",
+        "high": "Radiation dose is high",
+        "low": "Radiation dose is low",
+    },
+}
+
+RADIATION_ACTIONS = {
+    WATCH: ["Read the dosimeter again and compare it with your crewmates' readings.",
+            "Spend sleep and rest periods in the most shielded area; tell the Crew Medical Officer today."],
+    ACT: ["Move to the storm shelter (the most shielded area) now, with the whole crew.",
+          "Tell the Crew Medical Officer and the flight surgeon; stay sheltered until the dose rate falls."],
+}
+MISSION_DOSE_TEXT = {
+    "title": "Mission radiation dose is building up",
+    "why": "NASA limits an astronaut's career radiation dose to 600 mSv (NASA-STD-3001). The mission total "
+           "counts towards that limit, so the crew and flight surgeon plan shielding and time outside around it.",
+    "actions": {
+        WATCH: ["Use the most shielded areas for sleep and rest.",
+                "Review the remaining dose budget with the Crew Medical Officer and the flight surgeon."],
+        ACT: ["Tell the flight surgeon today: the mission total is close to the career limit.",
+              "Avoid extra exposure (spacewalks, time in lightly shielded modules) until reviewed."],
     },
 }
 
@@ -224,6 +253,40 @@ def _heart_rate_trend_alert(crew_id, mine, cfg):
     ), HR_RISE_TEXT["why"], "hrp-cardio", HR_RISE_TEXT["actions"][level])
 
 
+def mission_dose(readings, crew_id):
+    """Total radiation dose (mSv) logged for one crew member this mission."""
+    return sum(r.radiation_msv for r in readings if r.crew_id == crew_id and r.radiation_msv is not None)
+
+
+def _radiation_day_alert(crew_id, mine, cfg):
+    alert = _range_alert(crew_id, mine, "radiation_msv", cfg.vitals.radiation_msv)
+    if alert is not None:
+        alert.actions = list(RADIATION_ACTIONS[alert.level])
+    return alert
+
+
+def _mission_dose_alert(crew_id, mine, cfg):
+    v = cfg.vitals
+    with_dose = [r for r in mine if r.radiation_msv is not None]
+    if not with_dose:
+        return None
+    total = mission_dose(mine, crew_id)
+    level = ACT if total >= v.mission_dose_msv.act else WATCH if total >= v.mission_dose_msv.watch else None
+    if level is None:
+        return None
+    running, series = 0.0, []
+    for r in with_dose:
+        running += r.radiation_msv
+        series.append(SeriesPoint(day=r.day, value=running))
+    share = 100 * total / v.radiation_career_limit_msv
+    return _alert(crew_id, "mission_dose", level, MISSION_DOSE_TEXT["title"], with_dose[-1].day, AlertWhat(
+        metric="Mission radiation dose (total)", unit="mSv", baseline=None, now=total, delta=0,
+        summary=f"{total:.0f} mSv logged this mission, {share:.0f} % of the {v.radiation_career_limit_msv:g} mSv "
+                "career limit.",
+        series=series,
+    ), MISSION_DOSE_TEXT["why"], "nasa-std-3001", MISSION_DOSE_TEXT["actions"][level])
+
+
 def assess_vitals(readings, crew_id, cfg=HEALTH_RULES):
     """All vital-sign alerts for one crew member."""
     mine = [r for r in readings if r.crew_id == crew_id]
@@ -237,5 +300,7 @@ def assess_vitals(readings, crew_id, cfg=HEALTH_RULES):
         _range_alert(crew_id, mine, "temperature_c", cfg.vitals.temperature_c),
         _range_alert(crew_id, mine, "glucose_mg_dl", cfg.vitals.glucose_mg_dl),
         _range_alert(crew_id, mine, "spo2_pct", cfg.vitals.spo2_pct),
+        _radiation_day_alert(crew_id, mine, cfg),
+        _mission_dose_alert(crew_id, mine, cfg),
     ]
     return [a for a in candidates if a is not None]

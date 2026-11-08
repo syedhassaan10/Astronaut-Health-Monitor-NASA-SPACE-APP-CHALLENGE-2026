@@ -30,8 +30,10 @@ emergency step by step, with nothing but a laptop or tablet and its camera.
 - **Battery saving:** the pose model runs on about 1 frame in 7, and on every frame for 300 ms at the top and
   bottom of each rep.
 - **Daily check-in:** sleep, fatigue, pain (with location) and stress.
-- **Vital signs:** resting heart rate, blood pressure, temperature, blood sugar and oxygen saturation. Each comes
-  with a how-to guide.
+- **Vital signs:** resting heart rate, blood pressure, temperature, blood sugar, oxygen saturation and the day's
+  radiation dose from the personal dosimeter. Each comes with a how-to guide.
+- **Forecast page:** Hudebia Shaikh's digital twin (a Monte Carlo forecast of fatigue, sleep and motion-sickness
+  risk), a bone-loss projection with and without exercise, and daily energy needs (kcal).
 
 **Health rules**
 
@@ -39,6 +41,8 @@ emergency step by step, with nothing but a laptop or tablet and its camera.
 - **Exercise trends:** depth decline, slower lifting, rising asymmetry, rising variability, adherence.
 - **Check-in rules:** pain, poor recovery, stress, and knee pain combined with rising asymmetry.
 - **Vital signs:** normal ranges, plus a resting heart rate rising above the person's own baseline.
+- **Radiation:** a shelter alert for a day far above the deep-space background (a solar storm), and the mission
+  total against NASA's 600 mSv career limit.
 - **Every alert says** what changed, why it matters in space (with a NASA source) and what to do. All thresholds
   are in one file: [config/health_rules.py](config/health_rules.py).
 
@@ -150,6 +154,7 @@ python -m pytest -q
 | `pages/`, `ui/` | Streamlit pages and shared widgets |
 | `data/` | Crew, locations, demo data, CSV format |
 | `assets/` | Pose model and demo clip (bundled, so nothing is downloaded at run time) |
+| `digital_twin/` | Hudebia Shaikh's fatigue and motion-sickness model (Monte Carlo) and bone-loss projection |
 | `tests/` | pytest tests |
 
 ## How NASA resources are used
@@ -168,7 +173,9 @@ load an OSDR dataset at run time. Its demo crew data is synthetic, but the trend
 - Camera estimates depend on placement, light and clothing. The camera measures squat and deadlift; heel raise
   has a plan but is not measured.
 - On the 24 fps demo clip, battery saving cuts model calls by 72-76% with the same rep count (80% at 30 fps).
-- Vital signs are typed in; OrbitFit does not connect to medical devices.
+- Vital signs are typed in; OrbitFit does not connect to medical devices or dosimeters.
+- The forecasts (fatigue, motion sickness, bone loss, energy) are models with population parameters, not
+  measurements of the person.
 - The exercise device load, the Earth link and the demo crew are simulated.
 - The emergency guides follow common first-aid steps and never replace the onboard medical procedures, the Crew
   Medical Officer or the flight surgeon.
@@ -181,4 +188,4 @@ load an OSDR dataset at run time. Its demo crew data is synthetic, but the trend
 
 ## Team and licence
 
-Syed Hassaan Areeb Kazmi (Team Owner), Azam Tariq (Developer), Mohammad Bin Javed (Developer), Hudebia (Developer), Eman Fatima (UI/UX Designer). MIT License, see [LICENSE](LICENSE).
+Syed Hassaan Areeb Kazmi (Team Owner), Azam Tariq (Developer), Mohammad Bin Javed (Developer), Hudebia Shaikh (Developer), Eman Fatima (UI/UX Designer). MIT License, see [LICENSE](LICENSE).

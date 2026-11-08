@@ -46,6 +46,8 @@ def vitals_text(v):
         parts.append(f"SpO2 {v['spo2Pct']:g}%")
     if v.get("glucoseMgDl") is not None:
         parts.append(f"glucose {v['glucoseMgDl']:g}")
+    if v.get("radiationMsv") is not None:
+        parts.append(f"radiation {v['radiationMsv']:g} mSv")
     return f"Vitals day {v['day']}: " + " · ".join(parts)
 
 
@@ -89,6 +91,8 @@ def inbox():
             text = vitals_text(c.get("latestVitals"))
             if text:
                 st.caption(text)
+            if c.get("missionDoseMsv"):
+                st.caption(f"Radiation this mission: {c['missionDoseMsv']:g} mSv")
             if c.get("note"):
                 with st.expander("Crew Medical Officer notes"):
                     st.text(c["note"])

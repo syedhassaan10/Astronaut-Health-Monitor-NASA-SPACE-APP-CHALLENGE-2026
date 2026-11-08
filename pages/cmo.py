@@ -73,6 +73,7 @@ VITAL_METRICS = {
     "Body temperature (°C)": "temperature_c",
     "Blood sugar (mg/dL)": "glucose_mg_dl",
     "Oxygen saturation (%)": "spo2_pct",
+    "Radiation dose (mSv/day)": "radiation_msv",
 }
 CHECKIN_METRICS = {"Sleep (0-10)": "sleep", "Fatigue (0-10)": "fatigue", "Pain (0-10)": "pain", "Stress (0-10)": "stress"}
 

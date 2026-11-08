@@ -14,6 +14,7 @@ pages = [
     st.Page("pages/emergency.py", title="Emergency"),
     st.Page("pages/guides.py", title="Guides"),
     st.Page("pages/cmo.py", title="CMO"),
+    st.Page("pages/forecast.py", title="Forecast"),
     st.Page("pages/downlink.py", title="Downlink"),
     st.Page("pages/earth.py", title="Earth"),
     st.Page("pages/mission.py", title="Mission"),

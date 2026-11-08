@@ -67,6 +67,12 @@ class VitalsRules:
     temperature_c: Range = Range(watch_low=35.5, watch_high=37.8, act_low=35.0, act_high=38.5)
     glucose_mg_dl: Range = Range(watch_low=70, watch_high=180, act_low=54, act_high=250)
     spo2_pct: Range = Range(watch_low=95, watch_high=None, act_low=90, act_high=None)
+    # Radiation dose for the day from the personal dosimeter (mSv). Deep-space background is about 1.8 mSv a day
+    # (measured by MSL RAD on the cruise to Mars); a day far above it suggests a solar particle event: shelter.
+    radiation_msv: Range = Range(watch_low=None, watch_high=3.0, act_low=None, act_high=10.0)
+    # Total dose this mission against NASA's career limit of 600 mSv (NASA-STD-3001): WATCH at half, ACT at 80 %.
+    radiation_career_limit_msv: float = 600.0
+    mission_dose_msv: Levels = Levels(watch=300, act=480)
     # Resting heart rate rising above the person's own baseline (median of the first readings).
     baseline_readings: int = 3
     recent_readings: int = 3

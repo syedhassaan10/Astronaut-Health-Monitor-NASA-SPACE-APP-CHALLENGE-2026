@@ -11,7 +11,7 @@ APP = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
 
 PAGES = ["pages/today.py", "pages/emergency.py", "pages/guides.py", "pages/cmo.py", "pages/about.py",
          "pages/sources.py", "pages/downlink.py", "pages/earth.py",
-         "pages/mission.py"]
+         "pages/mission.py", "pages/forecast.py"]
 
 
 @pytest.fixture(autouse=True)

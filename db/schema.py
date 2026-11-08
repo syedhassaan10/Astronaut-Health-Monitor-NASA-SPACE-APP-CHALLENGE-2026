@@ -123,7 +123,8 @@ CREATE TABLE IF NOT EXISTS vitals (
     diastolic REAL,
     temperature_c REAL,
     glucose_mg_dl REAL,
-    spo2_pct REAL
+    spo2_pct REAL,
+    radiation_msv REAL
 );
 CREATE TABLE IF NOT EXISTS alerts (
     key TEXT PRIMARY KEY,

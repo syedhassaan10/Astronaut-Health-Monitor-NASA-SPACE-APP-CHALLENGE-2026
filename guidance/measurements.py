@@ -154,6 +154,32 @@ def measurement_guides():
             source_id="hrp-hypoxia",
         ),
         MeasurementGuide(
+            id="radiation_msv", title="Radiation dose", unit="mSv",
+            equipment="Your personal dosimeter (the badge or active dosimeter you wear).",
+            how_to=[
+                "Wear the dosimeter all day, including while you sleep.",
+                "Each morning, read the dose for the last 24 hours (or subtract yesterday's total from today's total).",
+                "Enter that daily dose in mSv. Leave it empty if you could not read it.",
+                "During a solar storm warning, read it every hour and follow the shelter procedure.",
+            ],
+            why_space="Outside Earth's magnetic field the crew is exposed to cosmic rays all the time and to solar "
+                      "particle events now and then. Radiation adds to the long-term risk of cancer, and NASA limits "
+                      f"each astronaut's career dose to {v.radiation_career_limit_msv:g} mSv.",
+            normal=f"Up to {v.radiation_msv.watch_high:g} mSv a day (deep-space background is about 1.8 mSv a day; "
+                   "on the ISS it is much lower).",
+            if_high="Read the dosimeter again and compare with your crewmates. If everyone is high, it is the "
+                    "environment: follow the solar storm (shelter) procedure.",
+            call_cmo_when=f"Above {v.radiation_msv.act_high:g} mSv in a day, a solar storm warning, or a mission total "
+                          f"above {v.mission_dose_msv.watch:g} mSv.",
+            environment_notes={
+                "microgravity": "In the spacecraft, the storm shelter is the most shielded area (often surrounded by "
+                                "water and supplies).",
+                "partial": "On the Moon or Mars, the habitat and the ground block half the sky; outside, return to "
+                           "the habitat when a solar storm is warned.",
+            },
+            source_id="nasa-std-3001",
+        ),
+        MeasurementGuide(
             id="checkin", title="Daily check-in (sleep, fatigue, pain, stress)", unit="0-10 scales",
             equipment="Nothing. About 30 seconds.",
             how_to=[

@@ -117,6 +117,8 @@ def vitals_chips(v):
         chips.append(f"SpO2 {v.spo2_pct:g}%")
     if v.glucose_mg_dl is not None:
         chips.append(f"Glucose {v.glucose_mg_dl:g}")
+    if v.radiation_msv is not None:
+        chips.append(f"Radiation {v.radiation_msv:g} mSv")
     return f'{theme.label(f"Vitals D{v.day}")} &nbsp;' + "".join(theme.chip(c) for c in chips)
 
 

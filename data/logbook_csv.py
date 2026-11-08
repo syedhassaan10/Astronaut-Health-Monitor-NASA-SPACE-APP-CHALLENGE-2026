@@ -22,7 +22,7 @@ ORIGINAL_COLUMNS = [
     "formScore", "flags", "level", "sessionStatus", "startedAt", "endedAt", "source",
     "sleep", "fatigue", "pain", "painLocation", "stress",
 ]
-VITAL_COLUMNS = ["heartRate", "systolic", "diastolic", "temperatureC", "glucoseMgDl", "spo2Pct"]
+VITAL_COLUMNS = ["heartRate", "systolic", "diastolic", "temperatureC", "glucoseMgDl", "spo2Pct", "radiationMsv"]
 COLUMNS = ORIGINAL_COLUMNS + VITAL_COLUMNS
 
 # Hard limits so a broken or hostile file cannot use up all memory.
@@ -39,6 +39,7 @@ VITAL_FIELDS = {
     "temperatureC": ("temperature_c", 30, 45),
     "glucoseMgDl": ("glucose_mg_dl", 10, 700),
     "spo2Pct": ("spo2_pct", 50, 100),
+    "radiationMsv": ("radiation_msv", 0, 1000),
 }
 
 

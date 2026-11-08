@@ -15,6 +15,7 @@ from data.csv_codec import encode_csv, parse_csv
 from data.logbook_csv import num
 from engine.change_detection import assess_crew
 from engine.session_metrics import summarize_session
+from engine.vitals_rules import mission_dose
 
 PACKET_VERSION = 1
 DISCLAIMER = ("Decision-support estimates from a prototype tool. Not a diagnosis or a medical device. "
@@ -116,7 +117,9 @@ def build_packet(sessions, checkins, vitals, crew, day, window_days, packet_id, 
             "latestVitals": None if latest_vitals is None else {
                 "day": latest_vitals.day, "heartRate": latest_vitals.heart_rate, "systolic": latest_vitals.systolic,
                 "diastolic": latest_vitals.diastolic, "temperatureC": latest_vitals.temperature_c,
-                "glucoseMgDl": latest_vitals.glucose_mg_dl, "spo2Pct": latest_vitals.spo2_pct},
+                "glucoseMgDl": latest_vitals.glucose_mg_dl, "spo2Pct": latest_vitals.spo2_pct,
+                "radiationMsv": latest_vitals.radiation_msv},
+            "missionDoseMsv": round(mission_dose(vitals, member.id), 1),
             "note": notes.get(member.id, ""),
         })
     packet = {

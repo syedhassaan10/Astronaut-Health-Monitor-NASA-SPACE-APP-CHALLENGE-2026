@@ -35,7 +35,19 @@ def open_db(path=None):
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA synchronous=FULL")
     conn.executescript(SCHEMA)
+    _add_missing_columns(conn)
     return conn
+
+
+# Columns added after the first release: a logbook made by an older version gets them on open.
+NEW_COLUMNS = [("vitals", "radiation_msv", "REAL")]
+
+
+def _add_missing_columns(conn):
+    for table, column, kind in NEW_COLUMNS:
+        existing = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})")}
+        if column not in existing:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {kind}")
 
 
 @contextmanager

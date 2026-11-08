@@ -160,6 +160,8 @@ VITAL_FIELDS = [
     ("temperature_c", "Body temperature (°C)", "temperature_c", HEALTH_RULES.vitals.temperature_c, 30.0, 45.0, 0.1),
     ("glucose_mg_dl", "Blood sugar (mg/dL)", "glucose_mg_dl", HEALTH_RULES.vitals.glucose_mg_dl, 10.0, 700.0, 1.0),
     ("spo2_pct", "Oxygen saturation (%)", "spo2_pct", HEALTH_RULES.vitals.spo2_pct, 50.0, 100.0, 1.0),
+    ("radiation_msv", "Radiation dose today (mSv, dosimeter)", "radiation_msv", HEALTH_RULES.vitals.radiation_msv,
+     0.0, 1000.0, 0.1),
 ]
 LEVEL_STATUS = {None: "NOMINAL", "WATCH": "WATCH", "ACT": "ACT"}
 LEVEL_WORD = {None: "normal", "WATCH": "outside the normal range", "ACT": "well outside the normal range"}
@@ -210,7 +212,7 @@ with tab_vitals:
             st.caption("Feeling unwell right now? Open the Emergency page.")
 
     theme.html_block(f'<div style="margin-top:0.8rem">{theme.label("How to measure")}</div>')
-    for guide_id in ("heart_rate", "blood_pressure", "temperature_c", "glucose_mg_dl", "spo2_pct"):
+    for guide_id in ("heart_rate", "blood_pressure", "temperature_c", "glucose_mg_dl", "spo2_pct", "radiation_msv"):
         guide = guide_by_id(guide_id)
         with st.expander(f"{guide.title} · {guide.equipment}"):
             for i, step in enumerate(guide.how_to, start=1):

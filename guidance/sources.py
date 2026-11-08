@@ -17,7 +17,18 @@ NASA_SOURCES = [
            "https://www.nasa.gov/hrp/hazards/",
            "Frames the problem. OrbitFit addresses altered gravity, isolation and confinement, distance from Earth, "
            "and (through oxygen saturation and the cabin-air checks in the emergency guide) the closed environment. "
-           "It does not measure radiation."),
+           "Radiation is logged from the crew's personal dosimeters; OrbitFit does not measure it itself."),
+    Source("nasa-std-3001", "NASA-STD-3001 Technical Brief: Design for Ionizing Radiation Protection (OCHMO-TB-020)",
+           "NASA Office of the Chief Health and Medical Officer",
+           "https://www.nasa.gov/wp-content/uploads/2023/03/radiation-protection-technical-brief-ochmo.pdf",
+           "Career limit: an astronaut's total career effective dose from spaceflight shall be less than 600 mSv "
+           "(V1 4030, p. 4); solar particle events limited to 250 mSv per event (p. 1). Basis for the mission-dose "
+           "rule."),
+    Source("msl-rad-cruise", "Data From NASA Rover's Voyage to Mars Aids Planning (30 May 2013)",
+           "NASA Jet Propulsion Laboratory",
+           "https://www.jpl.nasa.gov/news/data-from-nasa-rovers-voyage-to-mars-aids-planning/",
+           "Curiosity's RAD measured an average of 1.8 mSv of galactic cosmic rays per day on the cruise to Mars. "
+           "Basis for the daily radiation range (WATCH above 3 mSv a day, well over that background)."),
     Source("hrp-muscle-bone",
            "Risk of Reduced Physical Performance Capabilities Due to Reduced Muscle Size, Strength, and Endurance (Muscle Risk)",
            "NASA Human Research Program (Human Health and Performance)",
