@@ -163,3 +163,21 @@ def test_setting_up_a_new_mission_end_to_end(monkeypatch):
     assert "Building your normal" in text
     assert "Start here" not in text            # no judge tour on a real mission
     assert "mission day 1" in text.lower()
+
+
+@pytest.mark.parametrize("page", PAGES)
+def test_every_page_works_on_a_real_mission(monkeypatch, page):
+    # The demo hides the crew forms; a real mission shows them, so render each page there too.
+    from datetime import date
+
+    from db import mission
+    from db.database import open_db
+    from data.crew import CrewMember
+    conn = open_db()
+    mission.ensure_table(conn)
+    team = [CrewMember(id="ana", name="Ana Silva", role="Commander", mass_kg=68.0)]
+    mission.start_new_mission(conn, "Mars transit", date.today(), "transit", 0.5, 10, team, "ana", False, True)
+    conn.close()
+    monkeypatch.delenv("ORBITFIT_START_WITH_DEMO")
+    at = run_page(page)
+    assert not at.exception, [e.value for e in at.exception]

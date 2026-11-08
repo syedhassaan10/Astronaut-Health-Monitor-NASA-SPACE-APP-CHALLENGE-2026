@@ -31,8 +31,8 @@ CREATE TABLE IF NOT EXISTS mission (
 );
 """
 
-MIN_MASS_KG = 30
-MAX_MASS_KG = 200
+MIN_MASS_KG = 30.0
+MAX_MASS_KG = 200.0
 MAX_CREW = 12
 
 
@@ -129,7 +129,7 @@ def validate_crew(rows):
             errors.append(f"Row {i}: enter {name}'s body weight in kg.")
             continue
         if not MIN_MASS_KG <= mass <= MAX_MASS_KG:
-            errors.append(f"Row {i}: body weight must be between {MIN_MASS_KG} and {MAX_MASS_KG} kg.")
+            errors.append(f"Row {i}: body weight must be between {MIN_MASS_KG:g} and {MAX_MASS_KG:g} kg.")
             continue
         seen.add(name.lower())
         members.append(CrewMember(id=f"m{len(members) + 1}", name=name, role=role, mass_kg=mass))
