@@ -181,3 +181,15 @@ def test_every_page_works_on_a_real_mission(monkeypatch, page):
     monkeypatch.delenv("ORBITFIT_START_WITH_DEMO")
     at = run_page(page)
     assert not at.exception, [e.value for e in at.exception]
+
+
+def test_custom_gravity_slider_sets_the_gravity():
+    at = run_page(PAGES[0])
+    at.selectbox(key="_location_id").set_value("custom")
+    at.run()
+    assert not at.exception
+    at.slider(key="_custom_g").set_value(0.25)
+    at.run()
+    assert not at.exception
+    text = " ".join(m.value for m in at.markdown)
+    assert "0.25 g" in text

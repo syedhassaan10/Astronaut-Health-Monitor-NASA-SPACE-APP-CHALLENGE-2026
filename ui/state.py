@@ -152,8 +152,10 @@ def header(conn, m, team):
     offline_col.markdown(f'<div style="padding-bottom:0.45rem">{theme.pill("Works offline", theme.NOMINAL)}</div>',
                          unsafe_allow_html=True)
     if st.session_state.location_id == "custom":
-        location_col.slider("Gravity (g)", 0.0, 1.0, step=0.01, key="_custom_g", on_change=_remember,
-                            args=("custom_g",))
+        # Its own row under the Location box, so the header row above keeps its height and nothing jumps.
+        _, gravity_col, _ = st.columns([2.2, 2.2, 2.8])
+        gravity_col.slider("Gravity (g)", 0.0, 1.0, step=0.01, key="_custom_g", on_change=_remember,
+                           args=("custom_g",))
 
     ctx = context()
     data = load_data(conn)
