@@ -69,8 +69,14 @@ def test_no_bone_density_or_muscle_mass_numbers_are_claimed():
 
 
 def test_app_is_only_reachable_from_this_computer():
+    # The launcher binds to localhost; the config leaves the address open only so the public demo can run online.
+    for name in ("start.bat", "start.sh"):
+        launcher = (ROOT / name).read_text(encoding="utf-8")
+        assert "streamlit run app.py --server.address localhost" in launcher, name
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    assert "streamlit run app.py --server.address localhost" in readme
     config = (ROOT / ".streamlit" / "config.toml").read_text(encoding="utf-8")
-    assert 'address = "localhost"' in config
+    assert "0.0.0.0" not in config
 
 
 def test_the_menu_is_never_hidden_on_phones_and_tablets():

@@ -140,7 +140,7 @@ with info_col:
 st.divider()
 st.subheader("All measurement guides")
 guides = measurement_guides()
-tabs = st.tabs([g.title for g in guides])
+tabs = st.tabs([g.title for g in guides], key="guide_tab")
 for tab, guide in zip(tabs, guides):
     with tab:
         show_guide(guide, ctx.environment)

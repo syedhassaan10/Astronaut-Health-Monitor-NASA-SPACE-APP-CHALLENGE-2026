@@ -101,7 +101,8 @@ if sessions_done < 3 or heart_readings < 3:
         st.caption("Safety ranges for vital signs, pain and the Emergency page already work today.")
 
 tab_checkin, tab_vitals, tab_workout, tab_status = st.tabs(
-    ["1 · Check-in", "2 · Vitals", "3 · Workout", "4 · My status"])
+    ["1 · Check-in", "2 · Vitals", "3 · Workout", "4 · My status"],
+    key="crew_tab")  # keyed: pressing Demo Mode or Save keeps the tab that is open
 
 # ---- 1. check-in -----------------------------------------------------------------------------
 

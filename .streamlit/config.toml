@@ -11,8 +11,8 @@ font = "sans serif"
 gatherUsageStats = false
 
 [server]
-# Only this computer can open the app; health data is never served to the network.
-address = "localhost"
+# start.bat and start.sh add --server.address localhost, so on a crew laptop only that computer can open the app.
+# The address is not set here so a hosted copy (for example a public demo) can serve it if ever needed.
 headless = false
 maxUploadSize = 200
 

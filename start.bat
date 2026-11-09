@@ -24,5 +24,6 @@ if not exist ".venv\Scripts\python.exe" (
 )
 
 echo Starting OrbitFit at http://localhost:8501 (close this window to stop it)
-".venv\Scripts\python.exe" -m streamlit run app.py
+rem --server.address localhost: only this computer can open the app; health data is never served to the network.
+".venv\Scripts\python.exe" -m streamlit run app.py --server.address localhost
 pause

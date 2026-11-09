@@ -26,7 +26,7 @@ NAMES = state.crew_names(TEAM)
 assessments = {m.id: state.assess(data, m.id) for m in TEAM}
 
 tab_overview, tab_trends, tab_alerts, tab_log, tab_notes, tab_data = st.tabs(
-    ["Overview", "Trends", "Alerts", "Alert log", "Notes", "Logbook data"])
+    ["Overview", "Trends", "Alerts", "Alert log", "Notes", "Logbook data"], key="cmo_tab")
 
 
 def latest(items, crew_id):
