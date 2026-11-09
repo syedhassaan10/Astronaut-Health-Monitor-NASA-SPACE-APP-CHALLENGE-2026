@@ -433,7 +433,11 @@ def run_camera(cam):
                 wait = (t_ms - first_t) / 1000 - (time.monotonic() - wall_start)
                 if wait > 0:
                     time.sleep(wait)
-            video_slot.image(frame, channels="BGR", output_format="JPEG", width=520)
+            # At most 520 px wide and 560 px tall, so a tall (portrait) video still fits a laptop screen with the
+            # feet in view.
+            frame_h, frame_w = frame.shape[:2]
+            video_slot.image(frame, channels="BGR", output_format="JPEG",
+                             width=max(200, min(520, int(560 * frame_w / frame_h))))
 
             if t_ms - last_ui >= 250:
                 last_ui = t_ms
